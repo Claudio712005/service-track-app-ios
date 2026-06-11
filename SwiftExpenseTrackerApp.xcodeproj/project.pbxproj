@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C25489932FDAC9B5004E0750 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = C25489912FDAC9AD004E0750 /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C254897D2FDA3FF7004E0750 /* SwiftExpenseTrackerApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftExpenseTrackerApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C25489912FDAC9AD004E0750 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -34,6 +39,7 @@
 			children = (
 				C254897F2FDA3FF7004E0750 /* SwiftExpenseTrackerApp */,
 				C254897E2FDA3FF7004E0750 /* Products */,
+				C25489912FDAC9AD004E0750 /* .gitignore */,
 			);
 			sourceTree = "<group>";
 		};
@@ -109,6 +115,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C25489932FDAC9B5004E0750 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

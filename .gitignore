@@ -1,0 +1,65 @@
+# Xcode
+DerivedData/
+build/
+
+# User-specific data
+*.xcuserstate
+xcuserdata/
+
+# Workspace user data
+*.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+Packages/
+
+# Package resolved (opcional)
+# Se quiser travar versões no repositório, remova esta linha
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Archives
+*.xcarchive
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.swp
+*.tmp
+
+# XCTest
+*.xccheckout
+*.moved-aside
+*.xcscmblueprint
+
+# Simulator
+iOS Device Logs/
+
+# Secrets
+Secrets.swift
+Config.plist
+.env
+
+# Firebase
+GoogleService-Info.plist
+
+# SwiftData previews
+.previews/
+
+xcuserdata/
+*.xcuserstate
