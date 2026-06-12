@@ -9,9 +9,13 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        LazyVStack{
-            
-        }
+        ScrollView{
+            LazyVStack(alignment: .leading, spacing: 16) {
+                    HeaderHomeView(name: "Marina")
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(.horizontal, 15)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
