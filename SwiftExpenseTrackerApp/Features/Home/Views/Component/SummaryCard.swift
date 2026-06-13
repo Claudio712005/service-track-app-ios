@@ -17,28 +17,26 @@ struct SummaryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Image(systemName: icon)
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(iconColor)
-                .frame(width: 50, height: 50)
+                .frame(width: 30, height: 30)
                 .background(iconBackground)
                 .clipShape(Circle())
 
-            Spacer(minLength: 8)
-
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
-                    .font(.system(size: 21, weight: .regular))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundStyle(.secondary)
 
                 Text(value)
-                    .font(.system(size: 29, weight: .bold))
+                    .font(.system(size: 25, weight: .bold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
         }
         .padding(24)
-        .frame(maxWidth: .infinity, minHeight: 176, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 126, alignment: .leading)
         .background(.background)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 18, x: 0, y: 8)

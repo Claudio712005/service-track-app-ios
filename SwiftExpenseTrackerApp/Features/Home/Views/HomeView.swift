@@ -31,8 +31,9 @@ struct HomeView: View {
                                 iconColor: .red,
                                 iconBackground: .red.opacity(0.12)
                         )
-                    }
+                    }.padding(.horizontal, 9)
                 }
+                LatestTransactionsView()
             }
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .padding(.horizontal, 15)
