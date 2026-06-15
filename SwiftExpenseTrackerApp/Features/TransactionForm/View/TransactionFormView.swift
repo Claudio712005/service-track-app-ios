@@ -9,15 +9,29 @@ import SwiftUI
 
 struct TransactionFormView: View {
     var id: UUID?
+    @State var selection = CategoryType.income
+    
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Spacer()
+        VStack(spacing: 20) {
+            header	
+            Text("VALOR")
+                .font(.system(size: 18))
+                .fontWeight(.light)
+                .foregroundColor(.gray)
+            HStack{
+                Text("R$")
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundColor(.green)
+                Text("0,00")
+                    .font(.system(size: 44, weight: .bold)).foregroundColor(.gray).opacity(0.5)
+                    
+            }
+            TypeTransactionSelector(selection: $selection).padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(true)	
     }
     
     var header: some View {
