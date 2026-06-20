@@ -10,13 +10,17 @@ import SwiftUI
 struct HomeView: View {
     let onOpenTransactionForm: (UUID?) -> Void
     
+    @State private var isAnimated = false
+    
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             ScrollView{
                 LazyVStack(alignment: .leading, spacing: 16) {
-                    HeaderHomeView(name: "Marina")
+                    HeaderHomeView(name: "Marina", isAnimated: $isAnimated)
                     VStack(spacing: 24) {
                         FinanceCard()
+                            .opacity(isAnimated ? 1 : 0)
+                            .padding(.horizontal, isAnimated ? 0 : 20)
                         
                         HStack(spacing: 18) {
                             SummaryCard(
@@ -25,7 +29,7 @@ struct HomeView: View {
                                 icon: "arrow.down.left",
                                 iconColor: .green,
                                 iconBackground: .green.opacity(0.12)
-                            )
+                            ).opacity(isAnimated ? 1 : 0)
                             
                             SummaryCard(
                                 title: "Despesas",
@@ -33,8 +37,8 @@ struct HomeView: View {
                                 icon: "arrow.up.right",
                                 iconColor: .red,
                                 iconBackground: .red.opacity(0.12)
-                            )
-                        }.padding(.horizontal, 9)
+                            ).opacity(isAnimated ? 1 : 0)
+                        }.padding(.horizontal, isAnimated ? 0 : 9)
                     }
                     LatestTransactionsView()
                 }
@@ -53,8 +57,13 @@ struct HomeView: View {
                     .clipShape(Circle())
                     .shadow(radius: 6)
             }
+            .opacity(isAnimated ? 1 : 0)
             .padding(.trailing, 24)
-            .padding(.bottom, 24)
+            .padding(.bottom, isAnimated ? 24 : -100)
+        }.onAppear{
+            withAnimation(.easeInOut(duration: 0.8)){
+                isAnimated = true
+            }
         }
     }
 }

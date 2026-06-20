@@ -11,18 +11,23 @@ struct HeaderHomeView: View {
     
     let name: String
     
+    @Binding var isAnimated: Bool
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4){
             Text("Olá, \(name)")
                 .font(.subheadline)
                 .fontWeight(.light)
                 .foregroundStyle(.secondary)
+                .opacity(isAnimated ? 1 : 0)
             HStack(
                 spacing: 20
             ){
                 Text("Resumo")
                     .font(.largeTitle)
                     .fontWeight(.bold)
+                    .opacity(isAnimated ? 1 : 0)
+
                 Spacer()
                 HStack(spacing: 12) {
                     Button(
@@ -39,6 +44,8 @@ struct HeaderHomeView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Visualizar Categorias")
+                    .opacity(isAnimated ? 1 : 0)
+                    
                     Button(
                         action: {}
                     ){
@@ -53,7 +60,8 @@ struct HeaderHomeView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Visualizar Categorias")
-                }
+                    .opacity(isAnimated ? 1 : 0)
+                }.padding(.horizontal, isAnimated ? -20 : 0)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -63,5 +71,5 @@ struct HeaderHomeView: View {
 }
 
 #Preview {
-    HeaderHomeView(name: "Cláudio")
+    HeaderHomeView(name: "Cláudio", isAnimated: .constant(true))
 }
