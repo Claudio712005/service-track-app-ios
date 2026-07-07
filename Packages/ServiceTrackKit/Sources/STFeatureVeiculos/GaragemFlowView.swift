@@ -80,10 +80,12 @@ struct GaragemView: View {
                             STSkeleton(altura: 190, raio: DSRadius.md)
                         }
                     }
+                    .dsEntradaSuave()
                 case .erro(let erro):
                     STErrorState(mensagem: erro.mensagemPadrao) {
                         store.send(.recarregar)
                     }
+                    .dsEntradaSuave()
                 case .vazio:
                     STEmptyState(icone: "car",
                                  titulo: "Garagem vazia",
@@ -91,6 +93,7 @@ struct GaragemView: View {
                                  tituloCTA: "Adicionar veículo") {
                         navegar(.novo)
                     }
+                    .dsEntradaSuave()
                 case .conteudo(let veiculos):
                     grade {
                         ForEach(veiculos) { veiculo in
@@ -102,9 +105,11 @@ struct GaragemView: View {
                             .buttonStyle(.plain)
                         }
                     }
+                    .dsEntradaSuave()
                 }
             }
             .padding(DSSpacing.margemTela)
+            .dsAnimaFase(store.fase)
         }
         .safeAreaInset(edge: .bottom) {
             if case .conteudo = store.fase {

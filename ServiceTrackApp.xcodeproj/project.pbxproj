@@ -17,6 +17,7 @@
 		AA000000000000000000C007 /* STFeaturePerfil in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B007 /* STFeaturePerfil */; };
 		AA000000000000000000C008 /* STFeatureDashboard in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B008 /* STFeatureDashboard */; };
 		AA000000000000000000C009 /* STFeatureVeiculos in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B009 /* STFeatureVeiculos */; };
+		AA000000000000000000C010 /* STFeatureOrdens in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B010 /* STFeatureOrdens */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 				AA000000000000000000C007 /* STFeaturePerfil in Frameworks */,
 				AA000000000000000000C008 /* STFeatureDashboard in Frameworks */,
 				AA000000000000000000C009 /* STFeatureVeiculos in Frameworks */,
+				AA000000000000000000C010 /* STFeatureOrdens in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +100,7 @@
 				AA000000000000000000B007 /* STFeaturePerfil */,
 				AA000000000000000000B008 /* STFeatureDashboard */,
 				AA000000000000000000B009 /* STFeatureVeiculos */,
+				AA000000000000000000B010 /* STFeatureOrdens */,
 			);
 			productName = ServiceTrackApp;
 			productReference = C254897D2FDA3FF7004E0750 /* ServiceTrackApp.app */;
@@ -413,6 +416,10 @@
 		AA000000000000000000B009 /* STFeatureVeiculos */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STFeatureVeiculos;
+		};
+		AA000000000000000000B010 /* STFeatureOrdens */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = STFeatureOrdens;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

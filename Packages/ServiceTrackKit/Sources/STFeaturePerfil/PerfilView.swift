@@ -22,16 +22,18 @@ public struct PerfilView: View {
             VStack(spacing: DSSpacing.xl) {
                 switch (store.estado.carregando, store.estado.erroCarga) {
                 case (true, _):
-                    esqueleto
+                    esqueleto.dsEntradaSuave()
                 case (false, .some(let erro)):
                     STErrorState(mensagem: erro.mensagemPadrao) {
                         store.send(.recarregar)
                     }
+                    .dsEntradaSuave()
                 case (false, .none):
-                    conteudo
+                    conteudo.dsEntradaSuave()
                 }
             }
             .padding(DSSpacing.margemTela)
+            .dsAnimaFase(store.estado.carregando)
         }
         .background(DSColor.bgCanvas)
         .navigationTitle("Perfil")

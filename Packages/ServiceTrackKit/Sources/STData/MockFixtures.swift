@@ -88,7 +88,8 @@ enum MockFixtures {
         """
 
     // Datas camelCase sem offset, de propósito (C5).
-    static let ordemServicoDetalhe = """
+    static func ordemServicoDetalhe(status: String = "AGUARDANDO_APROVACAO") -> String {
+        """
         {
           "id": "\(osId)",
           "motivo": "Barulho ao frear e revisão geral",
@@ -96,7 +97,7 @@ enum MockFixtures {
           "clienteId": "\(clienteId)",
           "mecanicoId": "550e8400-e29b-41d4-a716-446655440101",
           "veiculoId": "\(veiculoId)",
-          "status": "AGUARDANDO_APROVACAO",
+          "status": "\(status)",
           "dataCriacao": "2026-07-01T09:30:00",
           "dataAtualizacao": "2026-07-03T15:45:00",
           "itensServico": [
@@ -132,6 +133,7 @@ enum MockFixtures {
           }
         }
         """
+    }
 
     static let ordemServicoRecebida = """
         {
@@ -161,11 +163,11 @@ enum MockFixtures {
         """
     }
 
-    static var pageOrdens: String {
+    static func pageOrdens(statusDestaque: String = "AGUARDANDO_APROVACAO") -> String {
         """
         {
           "content": [
-            \(resumoOrdem(status: "AGUARDANDO_APROVACAO")),
+            \(resumoOrdem(status: statusDestaque)),
             {
               "id": "5e43d7bf-57e2-414e-9f76-e0638237fabc",
               "clienteId": "\(clienteId)",

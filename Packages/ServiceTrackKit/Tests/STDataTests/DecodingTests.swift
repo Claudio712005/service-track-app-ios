@@ -8,7 +8,7 @@ import STNetworking
 final class DecodingTests: XCTestCase {
     func testOrdemServicoDetalheCamelCaseSemOffset() throws {
         let dto = try STJSON.decoder.decode(OrdemServicoResponseDTO.self,
-                                            from: Data(MockFixtures.ordemServicoDetalhe.utf8))
+                                            from: Data(MockFixtures.ordemServicoDetalhe().utf8))
         let os = dto.domain
         XCTAssertEqual(os.status, .aguardandoAprovacao)
         XCTAssertNotNil(os.dataCriacao)
@@ -36,7 +36,7 @@ final class DecodingTests: XCTestCase {
 
     func testPageDeOrdens() throws {
         let dto = try STJSON.decoder.decode(PageDTO<ResumoOrdemServicoResponseDTO>.self,
-                                            from: Data(MockFixtures.pageOrdens.utf8))
+                                            from: Data(MockFixtures.pageOrdens().utf8))
         let page = dto.domain(\.domain)
         XCTAssertEqual(page.content.count, 3)
         XCTAssertEqual(page.total, 3)

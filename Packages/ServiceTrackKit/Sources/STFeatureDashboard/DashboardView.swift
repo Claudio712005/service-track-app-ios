@@ -27,22 +27,25 @@ public struct DashboardView: View {
 
                 switch store.estado.fase {
                 case .carregando:
-                    esqueleto
+                    esqueleto.dsEntradaSuave()
                 case .erro(let erro):
                     STErrorState(mensagem: erro.mensagemPadrao) {
                         store.send(.recarregar)
                     }
+                    .dsEntradaSuave()
                 case .vazio:
                     STEmptyState(icone: "car",
                                  titulo: "Bem-vindo à sua oficina digital",
                                  subtitulo: "Cadastre seu primeiro veículo para abrir ordens de serviço e acompanhar tudo por aqui.",
                                  tituloCTA: aoCadastrarVeiculo != nil ? "Cadastrar meu veículo" : nil,
                                  acaoCTA: aoCadastrarVeiculo)
+                        .dsEntradaSuave()
                 case .conteudo:
-                    conteudo
+                    conteudo.dsEntradaSuave()
                 }
             }
             .padding(DSSpacing.margemTela)
+            .dsAnimaFase(store.estado.fase)
         }
         .background(DSColor.bgCanvas)
         .refreshable { await store.carregar() }

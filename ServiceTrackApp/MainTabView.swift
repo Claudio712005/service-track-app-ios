@@ -2,6 +2,7 @@ import SwiftUI
 import STCore
 import STDomain
 import STFeatureVeiculos
+import STFeatureOrdens
 
 /// Navegação raiz autenticada (spec §15): TabBar **customizada** com
 /// Início / Ordens / Garagem / Notificações. Ordens e Notificações chegam nas
@@ -64,9 +65,7 @@ struct MainTabView: View {
                 aba = .garagem
             }
         case .ordens:
-            emBreve(icone: "wrench.and.screwdriver",
-                    titulo: "Ordens de serviço",
-                    subtitulo: "A lista completa com filtros e a timeline de status chegam na próxima fase.")
+            OrdensFlowView(deps: .init(ordens: env.ordens, catalogo: env.catalogo))
         case .garagem:
             GaragemFlowView(deps: .init(veiculos: env.veiculos, ordens: env.ordens,
                                         proprietarioId: sessao.usuarioId))
