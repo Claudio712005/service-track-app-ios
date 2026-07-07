@@ -23,7 +23,7 @@ public struct Cliente: Equatable, Identifiable, Sendable {
     }
 }
 
-public struct Veiculo: Equatable, Identifiable, Sendable {
+public struct Veiculo: Hashable, Identifiable, Sendable {
     public let id: UUID
     public var placa: String
     public var marca: String

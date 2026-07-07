@@ -10,6 +10,7 @@ import STFeatureDashboard
 struct HomePlaceholderView: View {
     @Environment(AppEnvironment.self) private var env
     let sessao: Sessao
+    var aoIrParaGaragem: (() -> Void)?
 
     private enum Rota: Hashable {
         case perfil
@@ -22,7 +23,8 @@ struct HomePlaceholderView: View {
                                                 notificacoes: env.notificacoes,
                                                 ordens: env.ordens,
                                                 clienteId: sessao.usuarioId),
-                          nomeCliente: sessao.nome)
+                          nomeCliente: sessao.nome,
+                          aoCadastrarVeiculo: aoIrParaGaragem)
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         NavigationLink(value: Rota.perfil) {

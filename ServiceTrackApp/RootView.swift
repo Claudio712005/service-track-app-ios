@@ -38,7 +38,7 @@ struct RootView: View {
                     env.encerrarSessao()
                 }
             } else {
-                HomePlaceholderView(sessao: sessao)
+                MainTabView(sessao: sessao)
             }
         } else {
             AuthFlowView(
