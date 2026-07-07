@@ -85,6 +85,18 @@ final class AppEnvironment {
         sessao = nil
     }
 
+    #if DEBUG
+    /// Atalho de desenvolvimento: `ST_AUTOLOGIN=1` no scheme/`SIMCTL_CHILD_` faz
+    /// login automático contra o mock. Nunca compila em Release.
+    func autologinDebugSeNecessario() async {
+        guard sessao == nil,
+              ProcessInfo.processInfo.environment["ST_AUTOLOGIN"] == "1",
+              let s = try? await auth.login(email: "cliente@servicetrack.dev", senha: "Senha@123")
+        else { return }
+        try? iniciarSessao(s)
+    }
+    #endif
+
     /// Após `PUT /clientes/{id}`, espelha nome/e-mail na sessão persistida.
     func atualizarPerfil(_ cliente: Cliente) {
         guard let atual = sessao else { return }

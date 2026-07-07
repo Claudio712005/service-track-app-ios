@@ -244,6 +244,58 @@ enum MockFixtures {
               "dias_para_conclusao": 2,
               "valor_total": 320.00,
               "mecanico_nome": "Especialista Diego"
+            },
+            {
+              "id": "6a1b2c3d-0000-4000-8000-000000000004",
+              "motivo": "Pastilhas de freio",
+              "status": "ENTREGUE",
+              "veiculo_id": "660e8400-e29b-41d4-a716-446655550002",
+              "veiculo_placa": "XYZ9B76",
+              "veiculo_modelo": "Gol 2019",
+              "data_criacao": "2026-05-04T09:00:00Z",
+              "data_conclusao": "2026-05-06T16:00:00Z",
+              "dias_para_conclusao": 2,
+              "valor_total": 480.00,
+              "mecanico_nome": "Mário Máquina"
+            },
+            {
+              "id": "6a1b2c3d-0000-4000-8000-000000000005",
+              "motivo": "Alinhamento e balanceamento",
+              "status": "ENTREGUE",
+              "veiculo_id": "\(veiculoId)",
+              "veiculo_placa": "ABC1D23",
+              "veiculo_modelo": "Corolla 2022",
+              "data_criacao": "2026-05-20T10:00:00Z",
+              "data_conclusao": "2026-05-21T15:00:00Z",
+              "dias_para_conclusao": 1,
+              "valor_total": 180.00,
+              "mecanico_nome": "Técnico João"
+            },
+            {
+              "id": "6a1b2c3d-0000-4000-8000-000000000006",
+              "motivo": "Revisão de 30.000 km",
+              "status": "ENTREGUE",
+              "veiculo_id": "\(veiculoId)",
+              "veiculo_placa": "ABC1D23",
+              "veiculo_modelo": "Corolla 2022",
+              "data_criacao": "2026-04-08T08:30:00Z",
+              "data_conclusao": "2026-04-11T18:00:00Z",
+              "dias_para_conclusao": 3,
+              "valor_total": 890.50,
+              "mecanico_nome": "Especialista Diego"
+            },
+            {
+              "id": "6a1b2c3d-0000-4000-8000-000000000007",
+              "motivo": "Troca de bateria",
+              "status": "ENTREGUE",
+              "veiculo_id": "660e8400-e29b-41d4-a716-446655550002",
+              "veiculo_placa": "XYZ9B76",
+              "veiculo_modelo": "Gol 2019",
+              "data_criacao": "2026-03-14T11:00:00Z",
+              "data_conclusao": "2026-03-14T14:30:00Z",
+              "dias_para_conclusao": 0,
+              "valor_total": 650.00,
+              "mecanico_nome": "Mário Máquina"
             }
           ],
           "veiculos": [

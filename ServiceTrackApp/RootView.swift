@@ -21,6 +21,11 @@ struct RootView: View {
             }
         }
         .animation(DSMotion.toque, value: scenePhase == .active)
+        .task {
+            #if DEBUG
+            await env.autologinDebugSeNecessario()
+            #endif
+        }
     }
 
     @ViewBuilder

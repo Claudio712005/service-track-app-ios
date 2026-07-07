@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "STData", targets: ["STData"]),
         .library(name: "STFeatureAuth", targets: ["STFeatureAuth"]),
         .library(name: "STFeaturePerfil", targets: ["STFeaturePerfil"]),
+        .library(name: "STFeatureDashboard", targets: ["STFeatureDashboard"]),
     ],
     targets: [
         .target(name: "STDomain"),
@@ -22,10 +23,12 @@ let package = Package(
         .target(name: "STData", dependencies: ["STDomain", "STNetworking"]),
         .target(name: "STFeatureAuth", dependencies: ["STDomain", "STCore"]),
         .target(name: "STFeaturePerfil", dependencies: ["STDomain", "STCore"]),
+        .target(name: "STFeatureDashboard", dependencies: ["STDomain", "STCore"]),
         .testTarget(name: "STDomainTests", dependencies: ["STDomain"]),
         .testTarget(name: "STNetworkingTests", dependencies: ["STNetworking"]),
         .testTarget(name: "STDataTests", dependencies: ["STData"]),
         .testTarget(name: "STFeatureAuthTests", dependencies: ["STFeatureAuth"]),
         .testTarget(name: "STFeaturePerfilTests", dependencies: ["STFeaturePerfil"]),
+        .testTarget(name: "STFeatureDashboardTests", dependencies: ["STFeatureDashboard"]),
     ]
 )
