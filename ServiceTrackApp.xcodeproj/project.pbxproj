@@ -18,6 +18,8 @@
 		AA000000000000000000C008 /* STFeatureDashboard in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B008 /* STFeatureDashboard */; };
 		AA000000000000000000C009 /* STFeatureVeiculos in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B009 /* STFeatureVeiculos */; };
 		AA000000000000000000C010 /* STFeatureOrdens in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B010 /* STFeatureOrdens */; };
+		AA000000000000000000C011 /* STFeatureNotificacoes in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B011 /* STFeatureNotificacoes */; };
+		AA000000000000000000C012 /* STFeatureCatalogo in Frameworks */ = {isa = PBXBuildFile; productRef = AA000000000000000000B012 /* STFeatureCatalogo */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +50,8 @@
 				AA000000000000000000C008 /* STFeatureDashboard in Frameworks */,
 				AA000000000000000000C009 /* STFeatureVeiculos in Frameworks */,
 				AA000000000000000000C010 /* STFeatureOrdens in Frameworks */,
+				AA000000000000000000C011 /* STFeatureNotificacoes in Frameworks */,
+				AA000000000000000000C012 /* STFeatureCatalogo in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +105,8 @@
 				AA000000000000000000B008 /* STFeatureDashboard */,
 				AA000000000000000000B009 /* STFeatureVeiculos */,
 				AA000000000000000000B010 /* STFeatureOrdens */,
+				AA000000000000000000B011 /* STFeatureNotificacoes */,
+				AA000000000000000000B012 /* STFeatureCatalogo */,
 			);
 			productName = ServiceTrackApp;
 			productReference = C254897D2FDA3FF7004E0750 /* ServiceTrackApp.app */;
@@ -420,6 +426,14 @@
 		AA000000000000000000B010 /* STFeatureOrdens */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STFeatureOrdens;
+		};
+		AA000000000000000000B011 /* STFeatureNotificacoes */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = STFeatureNotificacoes;
+		};
+		AA000000000000000000B012 /* STFeatureCatalogo */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = STFeatureCatalogo;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

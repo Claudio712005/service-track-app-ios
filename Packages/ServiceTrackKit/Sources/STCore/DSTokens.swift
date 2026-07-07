@@ -29,6 +29,12 @@ extension Color {
     }
 }
 
+/// MVP é pt-BR (spec §18): datas formatadas explicitamente neste locale para
+/// não vazar o idioma do dispositivo numa UI 100% pt-BR. i18n plena é evolução.
+public extension Locale {
+    static let ptBR = Locale(identifier: "pt_BR")
+}
+
 public enum DSColor {
     // brand
     public static let brandPrimary = Color(hex: 0x2F6BFF)

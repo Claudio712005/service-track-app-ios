@@ -178,7 +178,7 @@ public struct DashboardView: View {
         }
 
         if let atualizado = store.estado.dashboard?.dataAtualizacao {
-            Text("Atualizado \(atualizado.formatted(.relative(presentation: .named)))")
+            Text("Atualizado \(atualizado.formatted(.relative(presentation: .named).locale(.ptBR)))")
                 .font(DSFont.caption)
                 .foregroundStyle(DSColor.textTertiary)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -234,7 +234,7 @@ public struct DashboardView: View {
                         STStatusBadge(.aguardandoAprovacao, tamanho: .sm)
                         Spacer()
                         if let prazo = os.prazoConclusao {
-                            Text("Prazo \(prazo.formatted(.dateTime.day().month(.abbreviated)))")
+                            Text("Prazo \(prazo.formatted(.dateTime.day().month(.abbreviated).locale(.ptBR)))")
                                 .font(DSFont.caption)
                                 .foregroundStyle(DSColor.textTertiary)
                         }
@@ -379,7 +379,7 @@ public struct DashboardView: View {
                                 .foregroundStyle(DSColor.textPrimary)
                                 .lineLimit(1)
                             Text([os.veiculoModelo,
-                                  os.dataConclusao.map { $0.formatted(.dateTime.day().month(.abbreviated)) }]
+                                  os.dataConclusao.map { $0.formatted(.dateTime.day().month(.abbreviated).locale(.ptBR)) }]
                                 .compactMap(\.self).joined(separator: " · "))
                                 .font(DSFont.caption)
                                 .foregroundStyle(DSColor.textTertiary)

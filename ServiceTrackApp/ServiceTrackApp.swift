@@ -8,6 +8,9 @@ struct ServiceTrackApp: App {
         WindowGroup {
             RootView()
                 .environment(environment)
+                // MVP é pt-BR (spec §18): UI inteira em pt-BR, então datas e
+                // moeda seguem o mesmo locale. i18n plena é evolução.
+                .environment(\.locale, Locale(identifier: "pt_BR"))
         }
     }
 }

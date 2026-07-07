@@ -62,3 +62,7 @@ GoogleService-Info.plist
 
 xcuserdata/
 *.xcuserstate
+
+openApi/
+
+*/adr/

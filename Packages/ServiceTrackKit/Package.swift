@@ -16,6 +16,8 @@ let package = Package(
         .library(name: "STFeatureDashboard", targets: ["STFeatureDashboard"]),
         .library(name: "STFeatureVeiculos", targets: ["STFeatureVeiculos"]),
         .library(name: "STFeatureOrdens", targets: ["STFeatureOrdens"]),
+        .library(name: "STFeatureNotificacoes", targets: ["STFeatureNotificacoes"]),
+        .library(name: "STFeatureCatalogo", targets: ["STFeatureCatalogo"]),
     ],
     targets: [
         .target(name: "STDomain"),
@@ -28,6 +30,8 @@ let package = Package(
         .target(name: "STFeatureDashboard", dependencies: ["STDomain", "STCore"]),
         .target(name: "STFeatureVeiculos", dependencies: ["STDomain", "STCore"]),
         .target(name: "STFeatureOrdens", dependencies: ["STDomain", "STCore"]),
+        .target(name: "STFeatureNotificacoes", dependencies: ["STDomain", "STCore"]),
+        .target(name: "STFeatureCatalogo", dependencies: ["STDomain", "STCore"]),
         .testTarget(name: "STDomainTests", dependencies: ["STDomain"]),
         .testTarget(name: "STNetworkingTests", dependencies: ["STNetworking"]),
         .testTarget(name: "STDataTests", dependencies: ["STData"]),
@@ -36,5 +40,7 @@ let package = Package(
         .testTarget(name: "STFeatureDashboardTests", dependencies: ["STFeatureDashboard"]),
         .testTarget(name: "STFeatureVeiculosTests", dependencies: ["STFeatureVeiculos"]),
         .testTarget(name: "STFeatureOrdensTests", dependencies: ["STFeatureOrdens"]),
+        .testTarget(name: "STFeatureNotificacoesTests", dependencies: ["STFeatureNotificacoes"]),
+        .testTarget(name: "STFeatureCatalogoTests", dependencies: ["STFeatureCatalogo"]),
     ]
 )

@@ -29,14 +29,14 @@ public final class MockTransport: APITransport, @unchecked Sendable {
         let metodo = request.httpMethod ?? "GET"
         let caminho = url.path
 
-        let (status, corpo) = resposta(metodo: metodo, caminho: caminho)
+        let (status, corpo) = resposta(metodo: metodo, caminho: caminho, query: url.query ?? "")
         let http = HTTPURLResponse(url: url, statusCode: status,
                                    httpVersion: "HTTP/1.1",
                                    headerFields: ["Content-Type": "application/json"])!
         return (Data(corpo.utf8), http)
     }
 
-    private func resposta(metodo: String, caminho: String) -> (Int, String) {
+    private func resposta(metodo: String, caminho: String, query: String) -> (Int, String) {
         switch (metodo, caminho) {
         // login: rota da spec e rota do índice OpenAPI (ADR-iOS-002 D4)
         case ("POST", "/autenticacao/login"), ("POST", "/autenticacao"):
@@ -98,7 +98,8 @@ public final class MockTransport: APITransport, @unchecked Sendable {
         case ("GET", "/notificacoes/nao-lidas/contagem"):
             return (200, #"{"total": 3}"#)
         case ("GET", "/notificacoes"):
-            return (200, MockFixtures.pageNotificacoes)
+            let apenasNaoLidas = query.contains("visualizada=false")
+            return (200, MockFixtures.pageNotificacoes(apenasNaoLidas: apenasNaoLidas))
         case ("PATCH", let p) where p.hasSuffix("/visualizar"):
             return (204, "")
         case ("GET", let p) where p.hasPrefix("/notificacoes/"):

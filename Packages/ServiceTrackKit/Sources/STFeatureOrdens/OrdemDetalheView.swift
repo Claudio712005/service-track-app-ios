@@ -211,7 +211,7 @@ struct OrdemDetalheView: View {
                                 .font(DSFont.subhead)
                                 .foregroundStyle(DSColor.textPrimary)
                             if let data = item.dataRealizacao {
-                                Text("Concluído \(data.formatted(.dateTime.day().month(.abbreviated)))")
+                                Text("Concluído \(data.formatted(.dateTime.day().month(.abbreviated).locale(.ptBR)))")
                                     .font(DSFont.caption)
                                     .foregroundStyle(DSColor.textTertiary)
                             }

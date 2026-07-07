@@ -45,12 +45,16 @@ final class DecodingTests: XCTestCase {
 
     func testNotificacoes() throws {
         let dto = try STJSON.decoder.decode(PageDTO<NotificacaoResponseDTO>.self,
-                                            from: Data(MockFixtures.pageNotificacoes.utf8))
+                                            from: Data(MockFixtures.pageNotificacoes().utf8))
         let page = dto.domain(\.domain)
-        XCTAssertEqual(page.content.count, 2)
+        XCTAssertEqual(page.content.count, 4)
         XCTAssertFalse(page.content[0].visualizada)
         XCTAssertEqual(page.content[0].statusEnvio, .enviada)
         XCTAssertNil(page.content[0].dataVisualizacao)
+
+        let naoLidas = try STJSON.decoder.decode(PageDTO<NotificacaoResponseDTO>.self,
+                                                 from: Data(MockFixtures.pageNotificacoes(apenasNaoLidas: true).utf8))
+        XCTAssertTrue(naoLidas.domain(\.domain).content.allSatisfy { !$0.visualizada })
     }
 
     func testLoginResponseComTokenDecodavel() throws {

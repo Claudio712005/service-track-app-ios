@@ -8,13 +8,16 @@ import STDomain
 public struct PerfilView: View {
     @State private var store: PerfilStore
     @Binding var biometriaHabilitada: Bool
+    let aoAbrirCatalogo: (() -> Void)?
     @State private var mostrandoEditar = false
     @State private var mostrandoSenha = false
     @State private var mostrandoDesativar = false
 
-    public init(store: PerfilStore, biometriaHabilitada: Binding<Bool>) {
+    public init(store: PerfilStore, biometriaHabilitada: Binding<Bool>,
+                aoAbrirCatalogo: (() -> Void)? = nil) {
         self._store = State(initialValue: store)
         self._biometriaHabilitada = biometriaHabilitada
+        self.aoAbrirCatalogo = aoAbrirCatalogo
     }
 
     public var body: some View {
@@ -129,6 +132,10 @@ public struct PerfilView: View {
 
     private var secaoSobre: some View {
         secao("Sobre") {
+            if let aoAbrirCatalogo {
+                linhaBotao("wrench.and.screwdriver", "Serviços oferecidos", acao: aoAbrirCatalogo)
+                Divider()
+            }
             VStack(alignment: .leading, spacing: DSSpacing.sm) {
                 Label {
                     Text("Esqueceu a senha? A troca é feita dentro do app. Sem acesso, entre em contato com a oficina.")

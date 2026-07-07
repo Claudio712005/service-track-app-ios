@@ -3,6 +3,7 @@ import STCore
 import STDomain
 import STFeatureVeiculos
 import STFeatureOrdens
+import STFeatureNotificacoes
 
 /// Navegação raiz autenticada (spec §15): TabBar **customizada** com
 /// Início / Ordens / Garagem / Notificações. Ordens e Notificações chegam nas
@@ -70,16 +71,8 @@ struct MainTabView: View {
             GaragemFlowView(deps: .init(veiculos: env.veiculos, ordens: env.ordens,
                                         proprietarioId: sessao.usuarioId))
         case .notificacoes:
-            emBreve(icone: "bell",
-                    titulo: "Notificações",
-                    subtitulo: "A central de avisos da sua oficina chega em breve.")
+            NotificacoesFlowView(repo: env.notificacoes)
         }
-    }
-
-    private func emBreve(icone: String, titulo: String, subtitulo: String) -> some View {
-        STEmptyState(icone: icone, titulo: titulo, subtitulo: subtitulo)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(DSColor.bgCanvas)
     }
 
     private var barra: some View {

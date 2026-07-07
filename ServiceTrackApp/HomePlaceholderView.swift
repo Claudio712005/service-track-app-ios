@@ -4,6 +4,7 @@ import STDomain
 import STPersistence
 import STFeaturePerfil
 import STFeatureDashboard
+import STFeatureCatalogo
 
 /// Home autenticada: Dashboard (spec §15.3) + acesso ao Perfil.
 /// TabBar customizada com Ordens/Garagem/Notificações chega nas próximas fases.
@@ -14,11 +15,14 @@ struct HomePlaceholderView: View {
 
     private enum Rota: Hashable {
         case perfil
+        case catalogo
         case galeriaDS
     }
 
+    @State private var caminho: [Rota] = []
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $caminho) {
             DashboardView(store: DashboardStore(dashboard: env.dashboard,
                                                 notificacoes: env.notificacoes,
                                                 ordens: env.ordens,
@@ -44,7 +48,11 @@ struct HomePlaceholderView: View {
                 .navigationDestination(for: Rota.self) { rota in
                     switch rota {
                     case .perfil:
-                        PerfilView(store: perfilStore, biometriaHabilitada: biometriaBinding)
+                        PerfilView(store: perfilStore, biometriaHabilitada: biometriaBinding) {
+                            caminho.append(.catalogo)
+                        }
+                    case .catalogo:
+                        CatalogoView(repo: env.catalogo)
                     case .galeriaDS:
                         FundacaoView()
                     }

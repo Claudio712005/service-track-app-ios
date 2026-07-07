@@ -102,10 +102,10 @@ public struct STStatusTimeline: View {
     private func detalhe(status: StatusOrdemServico, situacao: Situacao) -> String? {
         // O contrato só expõe criação e última atualização — datas nos nós que as têm.
         if status == .recebida, let dataCriacao {
-            return dataCriacao.formatted(.dateTime.day().month(.abbreviated).hour().minute())
+            return dataCriacao.formatted(.dateTime.day().month(.abbreviated).hour().minute().locale(.ptBR))
         }
         if situacao == .atual, let dataAtualizacao {
-            return dataAtualizacao.formatted(.dateTime.day().month(.abbreviated).hour().minute())
+            return dataAtualizacao.formatted(.dateTime.day().month(.abbreviated).hour().minute().locale(.ptBR))
         }
         return nil
     }

@@ -165,7 +165,7 @@ public struct Page<Element: Equatable & Sendable>: Equatable, Sendable {
     public var temProximaPagina: Bool { page + 1 < totalPages }
 }
 
-public struct Notificacao: Equatable, Identifiable, Sendable {
+public struct Notificacao: Hashable, Identifiable, Sendable {
     public enum StatusEnvio: String, Sendable {
         case pendente = "PENDENTE"
         case enviada = "ENVIADA"

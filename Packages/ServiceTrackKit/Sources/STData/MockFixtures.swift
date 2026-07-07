@@ -346,11 +346,37 @@ enum MockFixtures {
         }
         """
 
-    static var pageNotificacoes: String {
-        """
-        {
-          "content": [
+    private static let notificacoesNaoLidas = """
             \(notificacao),
+            {
+              "id": "c1b2c3d4-e5f6-4890-abcd-ef1234567892",
+              "titulo": "Diagnóstico iniciado",
+              "assunto": "Seu Corolla entrou em diagnóstico",
+              "descricao": "O mecânico Mário Máquina iniciou a avaliação do veículo.",
+              "tipoNotificacao": "EMAIL",
+              "tipoConteudo": "MUDANCA_STATUS_OS",
+              "statusEnvio": "ENVIADA",
+              "visualizada": false,
+              "dataCriacao": "2026-07-02T08:15:00",
+              "dataEnvio": "2026-07-02T08:15:30",
+              "dataVisualizacao": null
+            },
+            {
+              "id": "d1b2c3d4-e5f6-4890-abcd-ef1234567893",
+              "titulo": "Ordem recebida",
+              "assunto": "Recebemos seu veículo",
+              "descricao": "Sua ordem de serviço foi aberta e aguarda o início do diagnóstico.",
+              "tipoNotificacao": "EMAIL",
+              "tipoConteudo": "MUDANCA_STATUS_OS",
+              "statusEnvio": "ENVIADA",
+              "visualizada": false,
+              "dataCriacao": "2026-07-01T09:31:00",
+              "dataEnvio": "2026-07-01T09:31:20",
+              "dataVisualizacao": null
+            }
+        """
+
+    private static let notificacaoLida = """
             {
               "id": "b1b2c3d4-e5f6-4890-abcd-ef1234567891",
               "titulo": "Ordem de Serviço Atualizada",
@@ -364,10 +390,22 @@ enum MockFixtures {
               "dataEnvio": "2026-07-05T11:21:20",
               "dataVisualizacao": "2026-07-05T12:00:00"
             }
+        """
+
+    /// Respeita a query `visualizada=false` do contrato (spec §7.8).
+    static func pageNotificacoes(apenasNaoLidas: Bool = false) -> String {
+        let itens = apenasNaoLidas
+            ? notificacoesNaoLidas
+            : "\(notificacoesNaoLidas),\n\(notificacaoLida)"
+        let total = apenasNaoLidas ? 3 : 4
+        return """
+        {
+          "content": [
+        \(itens)
           ],
           "page": 0,
           "size": 20,
-          "total": 2,
+          "total": \(total),
           "totalPages": 1
         }
         """
