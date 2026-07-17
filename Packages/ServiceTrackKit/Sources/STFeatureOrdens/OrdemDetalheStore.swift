@@ -45,11 +45,14 @@ public final class OrdemDetalheStore {
     private let osId: UUID
     private let ordens: OrdemServicoRepository
     private let catalogo: CatalogoRepository
+    private let cache: CacheStore?
 
-    public init(osId: UUID, ordens: OrdemServicoRepository, catalogo: CatalogoRepository) {
+    public init(osId: UUID, ordens: OrdemServicoRepository, catalogo: CatalogoRepository,
+                cache: CacheStore? = nil) {
         self.osId = osId
         self.ordens = ordens
         self.catalogo = catalogo
+        self.cache = cache
     }
 
     public func send(_ acao: Acao) {
@@ -121,6 +124,8 @@ public final class OrdemDetalheStore {
             } catch {
                 estado.erroAcao = AppError.rede.mensagemPadrao
             }
+            // Ação em OS invalida o dashboard cacheado (spec §11.2).
+            await cache?.invalidar(chaves: [CacheChave.dashboard])
             await carregar()
             estado.decidindo = false
         }

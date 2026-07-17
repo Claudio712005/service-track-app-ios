@@ -33,6 +33,7 @@ let package = Package(
         .target(name: "STFeatureNotificacoes", dependencies: ["STDomain", "STCore"]),
         .target(name: "STFeatureCatalogo", dependencies: ["STDomain", "STCore"]),
         .testTarget(name: "STDomainTests", dependencies: ["STDomain"]),
+        .testTarget(name: "STPersistenceTests", dependencies: ["STPersistence"]),
         .testTarget(name: "STNetworkingTests", dependencies: ["STNetworking"]),
         .testTarget(name: "STDataTests", dependencies: ["STData"]),
         .testTarget(name: "STFeatureAuthTests", dependencies: ["STFeatureAuth"]),

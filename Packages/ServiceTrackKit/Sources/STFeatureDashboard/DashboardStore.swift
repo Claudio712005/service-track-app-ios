@@ -23,6 +23,8 @@ public final class DashboardStore {
         public var decidindo = false
         public var erroAcao: String?
         public var sucessoAcao: String?
+        /// Rede indisponível, exibindo cache (spec §11.3 — banner sutil).
+        public var offline = false
 
         /// OS aguardando decisão do cliente — card "Precisa da sua atenção" (RF07).
         public var pendenteDeAprovacao: OrdemAtivaDashboard? {
@@ -57,6 +59,7 @@ public final class DashboardStore {
     public enum Acao {
         case aparecer
         case recarregar
+        case voltouAoForeground
         case aprovarOrcamento(UUID)
         case reprovarOrcamento(UUID, motivo: String)
         case limparFeedback
@@ -68,21 +71,28 @@ public final class DashboardStore {
     private let notificacoes: NotificacaoRepository
     private let ordens: OrdemServicoRepository
     private let clienteId: UUID
+    private let cache: CacheStore?
+    /// TTL do dashboard (spec §11.2): vencido só força revalidação, não descarta.
+    private let ttl: TimeInterval = 60
 
     public init(dashboard: DashboardRepository, notificacoes: NotificacaoRepository,
-                ordens: OrdemServicoRepository, clienteId: UUID) {
+                ordens: OrdemServicoRepository, clienteId: UUID, cache: CacheStore? = nil) {
         self.dashboard = dashboard
         self.notificacoes = notificacoes
         self.ordens = ordens
         self.clienteId = clienteId
+        self.cache = cache
     }
 
     public func send(_ acao: Acao) {
         switch acao {
         case .aparecer:
-            if estado.dashboard == nil { Task { await carregar() } }
+            if estado.dashboard == nil { Task { await carregar(forcar: false) } }
         case .recarregar:
             Task { await carregar() }
+        case .voltouAoForeground:
+            // Revalidação em foreground (spec §11.3) — silenciosa, sem skeleton.
+            if estado.dashboard != nil { Task { await carregar() } }
         case .aprovarOrcamento(let osId):
             decidir(osId: osId, motivo: nil)
         case .reprovarOrcamento(let osId, let motivo):
@@ -93,24 +103,48 @@ public final class DashboardStore {
         }
     }
 
+    /// SWR (spec §11.2): emite o cache primeiro (revisita sem skeleton) e
+    /// revalida na rede; rede fora + cache presente → banner offline (§11.3).
     /// Também chamado pelo pull-to-refresh da view (aguardável).
-    public func carregar() async {
+    public func carregar(forcar: Bool = true) async {
+        var cacheFresco = false
+        if estado.dashboard == nil,
+           let cache,
+           let entrada = await cache.ler(DashboardCliente.self, chave: CacheChave.dashboard) {
+            aplicar(entrada.valor)
+            cacheFresco = !entrada.vencida(ttl: ttl)
+        }
         if estado.dashboard == nil { estado.fase = .carregando }
+        // Cache dentro do TTL e sem forçar: revisita instantânea, sem rede.
+        if cacheFresco && !forcar { return }
+
         do {
             // RN-02: id do path é sempre o da sessão.
             async let dash = dashboard.buscar(clienteId: clienteId)
             async let contagem = notificacoes.contagemNaoLidas()
             let (d, n) = try await (dash, contagem)
-            estado.dashboard = d
+            aplicar(d)
             estado.naoLidas = n
-            estado.fase = (d.resumo.totalOrdens == 0 && d.resumo.veiculosCadastrados == 0)
-                ? .vazio : .conteudo
+            estado.offline = false
+            await cache?.gravar(d, chave: CacheChave.dashboard)
         } catch let erro as AppError {
-            if estado.dashboard == nil { estado.fase = .erro(erro) }
-            else { estado.erroAcao = erro.mensagemPadrao }
+            if estado.dashboard == nil {
+                estado.fase = .erro(erro)
+            } else if case .rede = erro {
+                estado.offline = true
+            } else {
+                estado.erroAcao = erro.mensagemPadrao
+            }
         } catch {
             if estado.dashboard == nil { estado.fase = .erro(.rede) }
+            else { estado.offline = true }
         }
+    }
+
+    private func aplicar(_ d: DashboardCliente) {
+        estado.dashboard = d
+        estado.fase = (d.resumo.totalOrdens == 0 && d.resumo.veiculosCadastrados == 0)
+            ? .vazio : .conteudo
     }
 
     /// Aprovar (motivo nil) ou reprovar (RN-05: motivo obrigatório). Sem retry
@@ -138,6 +172,8 @@ public final class DashboardStore {
             } catch {
                 estado.erroAcao = AppError.rede.mensagemPadrao
             }
+            // Ação em OS invalida o dashboard cacheado (spec §11.2).
+            await cache?.invalidar(chaves: [CacheChave.dashboard])
             await carregar()
             estado.decidindo = false
         }

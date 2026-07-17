@@ -26,7 +26,8 @@ struct HomePlaceholderView: View {
             DashboardView(store: DashboardStore(dashboard: env.dashboard,
                                                 notificacoes: env.notificacoes,
                                                 ordens: env.ordens,
-                                                clienteId: sessao.usuarioId),
+                                                clienteId: sessao.usuarioId,
+                                                cache: env.cache),
                           nomeCliente: sessao.nome,
                           aoCadastrarVeiculo: aoIrParaGaragem)
                 .toolbar {
@@ -52,7 +53,7 @@ struct HomePlaceholderView: View {
                             caminho.append(.catalogo)
                         }
                     case .catalogo:
-                        CatalogoView(repo: env.catalogo)
+                        CatalogoView(repo: env.catalogo, cache: env.cache)
                     case .galeriaDS:
                         FundacaoView()
                     }

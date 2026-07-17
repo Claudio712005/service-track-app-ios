@@ -53,13 +53,15 @@ public final class VeiculoFormStore {
 
     private let veiculos: VeiculoRepository
     private let proprietarioId: UUID
+    private let cache: CacheStore?
     private let aoSalvar: (Veiculo) -> Void
 
     public init(modo: Modo, veiculos: VeiculoRepository, proprietarioId: UUID,
-                aoSalvar: @escaping (Veiculo) -> Void) {
+                cache: CacheStore? = nil, aoSalvar: @escaping (Veiculo) -> Void) {
         self.modo = modo
         self.veiculos = veiculos
         self.proprietarioId = proprietarioId
+        self.cache = cache
         self.aoSalvar = aoSalvar
 
         if case .editar(let veiculo) = modo {
@@ -170,6 +172,8 @@ public final class VeiculoFormStore {
                                                          marca: marca, ano: ano,
                                                          urlImagem: estado.imagemSelecionada)
                 }
+                // CRUD de veículo invalida veículos + dashboard (spec §11.2).
+                await cache?.invalidar(chaves: [CacheChave.veiculos, CacheChave.dashboard])
                 aoSalvar(salvo)
             } catch let erro as AppError {
                 estado.erroGeral = erro.mensagemPadrao

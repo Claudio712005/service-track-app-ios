@@ -23,6 +23,10 @@ public final class MockTransport: APITransport, @unchecked Sendable {
     }
 
     public func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        // Simulação de queda de rede p/ testar SWR/offline: ST_OFFLINE=1.
+        if ProcessInfo.processInfo.environment["ST_OFFLINE"] == "1" {
+            throw URLError(.notConnectedToInternet)
+        }
         try await Task.sleep(for: latencia)
 
         guard let url = request.url else { throw URLError(.badURL) }

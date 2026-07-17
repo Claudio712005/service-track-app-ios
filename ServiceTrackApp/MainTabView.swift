@@ -66,10 +66,11 @@ struct MainTabView: View {
                 aba = .garagem
             }
         case .ordens:
-            OrdensFlowView(deps: .init(ordens: env.ordens, catalogo: env.catalogo))
+            OrdensFlowView(deps: .init(ordens: env.ordens, catalogo: env.catalogo,
+                                       cache: env.cache))
         case .garagem:
             GaragemFlowView(deps: .init(veiculos: env.veiculos, ordens: env.ordens,
-                                        proprietarioId: sessao.usuarioId))
+                                        proprietarioId: sessao.usuarioId, cache: env.cache))
         case .notificacoes:
             NotificacoesFlowView(repo: env.notificacoes)
         }

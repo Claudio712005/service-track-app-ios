@@ -33,6 +33,8 @@ final class AppEnvironment {
     let sessaoStore: SessaoStore
     /// Preferências por instalação (onboarding, biometria) — ADR-iOS-004.
     let preferencias = PreferenciasLocais()
+    /// Cache de leitura SWR em disco (ADR-iOS-005).
+    let cache: CacheStore = DiscoCache()
 
     private let tokenBox = TokenBox()
     private(set) var sessao: Sessao?
@@ -78,11 +80,15 @@ final class AppEnvironment {
         self.sessao = sessao
     }
 
-    /// Logout (spec §8.2 item 6): apaga o Keychain e limpa o estado.
+    /// Logout (spec §8.2 item 6): apaga o Keychain e limpa o cache sensível.
     func encerrarSessao() {
         try? sessaoStore.limpar()
         tokenBox.atualizar(nil)
         sessao = nil
+        Task { [cache] in
+            await cache.invalidar(chaves: [CacheChave.dashboard, CacheChave.veiculos,
+                                           CacheChave.catalogo])
+        }
     }
 
     #if DEBUG

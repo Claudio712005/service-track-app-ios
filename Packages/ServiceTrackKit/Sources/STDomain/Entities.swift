@@ -23,7 +23,7 @@ public struct Cliente: Equatable, Identifiable, Sendable {
     }
 }
 
-public struct Veiculo: Hashable, Identifiable, Sendable {
+public struct Veiculo: Hashable, Identifiable, Sendable, Codable {
     public let id: UUID
     public var placa: String
     public var marca: String
@@ -202,7 +202,7 @@ public struct Notificacao: Hashable, Identifiable, Sendable {
     }
 }
 
-public struct CatalogoServico: Equatable, Identifiable, Sendable {
+public struct CatalogoServico: Equatable, Identifiable, Sendable, Codable {
     public let id: UUID
     public var nomeServico: String
     public var descricaoServico: String
@@ -214,7 +214,7 @@ public struct CatalogoServico: Equatable, Identifiable, Sendable {
     }
 }
 
-public struct CatalogoInsumo: Equatable, Identifiable, Sendable {
+public struct CatalogoInsumo: Equatable, Identifiable, Sendable, Codable {
     public let id: UUID
     public var nome: String
     public var descricao: String

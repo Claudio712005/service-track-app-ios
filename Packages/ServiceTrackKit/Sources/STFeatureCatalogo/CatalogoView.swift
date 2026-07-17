@@ -14,22 +14,44 @@ public final class CatalogoStore {
         case erro(AppError)
     }
 
+    /// Par cacheado junto (uma chave, um TTL — spec §11.2: catálogo 24h).
+    struct Snapshot: Codable, Sendable {
+        let servicos: [CatalogoServico]
+        let insumos: [CatalogoInsumo]
+    }
+
     public private(set) var fase: Fase = .carregando
 
     private let repo: CatalogoRepository
+    private let cache: CacheStore?
+    private let ttl: TimeInterval = 24 * 3600
 
-    public init(repo: CatalogoRepository) {
+    public init(repo: CatalogoRepository, cache: CacheStore? = nil) {
         self.repo = repo
+        self.cache = cache
     }
 
     public func carregar() async {
+        var cacheFresco = false
+        if case .carregando = fase, let cache,
+           let entrada = await cache.ler(Snapshot.self, chave: CacheChave.catalogo) {
+            fase = .conteudo(servicos: entrada.valor.servicos, insumos: entrada.valor.insumos)
+            cacheFresco = !entrada.vencida(ttl: ttl)
+        }
+        // Catálogo é quase estático: dentro do TTL não vai à rede (spec §11.2).
+        if cacheFresco { return }
+
         do {
             async let servicos = repo.servicos()
             async let insumos = repo.insumos()
-            fase = try await .conteudo(servicos: servicos, insumos: insumos)
+            let snapshot = try await Snapshot(servicos: servicos, insumos: insumos)
+            fase = .conteudo(servicos: snapshot.servicos, insumos: snapshot.insumos)
+            await cache?.gravar(snapshot, chave: CacheChave.catalogo)
         } catch let erro as AppError {
+            if case .conteudo = fase { return } // cache velho ainda serve
             fase = .erro(erro)
         } catch {
+            if case .conteudo = fase { return }
             fase = .erro(.rede)
         }
     }
@@ -38,8 +60,8 @@ public final class CatalogoStore {
 public struct CatalogoView: View {
     @State private var store: CatalogoStore
 
-    public init(repo: CatalogoRepository) {
-        self._store = State(initialValue: CatalogoStore(repo: repo))
+    public init(repo: CatalogoRepository, cache: CacheStore? = nil) {
+        self._store = State(initialValue: CatalogoStore(repo: repo, cache: cache))
     }
 
     public var body: some View {

@@ -3,7 +3,7 @@ import Foundation
 // Modelo de domínio do dashboard (spec §7.7). A API responde em snake_case;
 // a conversão é isolada nos DTOs de STData (spec §9 C2).
 
-public struct DashboardCliente: Equatable, Sendable {
+public struct DashboardCliente: Equatable, Sendable, Codable {
     public var usuarioId: UUID
     public var usuarioNome: String?
     public var resumo: ResumoDashboard
@@ -26,7 +26,7 @@ public struct DashboardCliente: Equatable, Sendable {
 }
 
 /// Números do card de resumo — exibidos como o backend envia, sem recálculo (spec §9 C7).
-public struct ResumoDashboard: Equatable, Sendable {
+public struct ResumoDashboard: Equatable, Sendable, Codable {
     public var ordensAtivas: Int
     public var ordensConcluidas: Int
     public var ordensCanceladas: Int
@@ -43,7 +43,7 @@ public struct ResumoDashboard: Equatable, Sendable {
     }
 }
 
-public struct OrdemAtivaDashboard: Equatable, Identifiable, Sendable {
+public struct OrdemAtivaDashboard: Equatable, Identifiable, Sendable, Codable {
     public let id: UUID
     public var motivo: String
     public var status: StatusOrdemServico
@@ -78,7 +78,7 @@ public struct OrdemAtivaDashboard: Equatable, Identifiable, Sendable {
     }
 }
 
-public struct OrdemRecenteDashboard: Equatable, Identifiable, Sendable {
+public struct OrdemRecenteDashboard: Equatable, Identifiable, Sendable, Codable {
     public let id: UUID
     public var motivo: String
     public var status: StatusOrdemServico
@@ -108,7 +108,7 @@ public struct OrdemRecenteDashboard: Equatable, Identifiable, Sendable {
     }
 }
 
-public struct VeiculoDashboard: Equatable, Identifiable, Sendable {
+public struct VeiculoDashboard: Equatable, Identifiable, Sendable, Codable {
     public let id: UUID
     public var placa: String
     public var marca: String

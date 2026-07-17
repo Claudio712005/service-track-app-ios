@@ -62,6 +62,35 @@ public protocol CatalogoRepository: Sendable {
     func insumos() async throws -> [CatalogoInsumo]
 }
 
+/// Entrada de cache com carimbo de quando foi buscada (spec §11.2).
+public struct CacheEntrada<Valor: Sendable>: Sendable {
+    public let valor: Valor
+    public let fetchedAt: Date
+
+    public init(valor: Valor, fetchedAt: Date) {
+        self.valor = valor
+        self.fetchedAt = fetchedAt
+    }
+
+    public func vencida(ttl: TimeInterval, agora: Date = .now) -> Bool {
+        agora.timeIntervalSince(fetchedAt) > ttl
+    }
+}
+
+/// Port de cache de leitura (ADR-iOS-005). Implementado por `DiscoCache`.
+public protocol CacheStore: Sendable {
+    func ler<T: Codable & Sendable>(_ tipo: T.Type, chave: String) async -> CacheEntrada<T>?
+    func gravar<T: Codable & Sendable>(_ valor: T, chave: String) async
+    func invalidar(chaves: [String]) async
+}
+
+/// Chaves de cache canônicas — invalidação cita estas constantes.
+public enum CacheChave {
+    public static let dashboard = "dashboard"
+    public static let veiculos = "veiculos"
+    public static let catalogo = "catalogo"
+}
+
 /// Port de persistência de sessão (Keychain em produção — spec §8.2).
 public protocol SessaoStore: Sendable {
     func carregar() throws -> Sessao?

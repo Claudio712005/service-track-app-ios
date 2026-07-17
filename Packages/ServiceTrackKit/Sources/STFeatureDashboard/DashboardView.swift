@@ -12,6 +12,7 @@ public struct DashboardView: View {
 
     @State private var confirmandoAprovacao: OrdemAtivaDashboard?
     @State private var reprovando: OrdemAtivaDashboard?
+    @Environment(\.scenePhase) private var scenePhase
 
     public init(store: DashboardStore, nomeCliente: String,
                 aoCadastrarVeiculo: (() -> Void)? = nil) {
@@ -24,6 +25,10 @@ public struct DashboardView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DSSpacing.xxl) {
                 cabecalho
+
+                if store.estado.offline {
+                    STBanner("Offline — mostrando dados salvos")
+                }
 
                 switch store.estado.fase {
                 case .carregando:
@@ -50,6 +55,10 @@ public struct DashboardView: View {
         .background(DSColor.bgCanvas)
         .refreshable { await store.carregar() }
         .onAppear { store.send(.aparecer) }
+        .onChange(of: scenePhase) { _, nova in
+            // Revalidação ao voltar ao foreground (spec §11.3).
+            if nova == .active { store.send(.voltouAoForeground) }
+        }
         .confirmationDialog(tituloConfirmacao, isPresented: presenteAprovacao, titleVisibility: .visible) {
             Button("Aprovar orçamento") {
                 if let os = confirmandoAprovacao {

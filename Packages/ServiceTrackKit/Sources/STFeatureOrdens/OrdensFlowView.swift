@@ -7,10 +7,13 @@ public struct OrdensFlowView: View {
     public struct Dependencias {
         let ordens: OrdemServicoRepository
         let catalogo: CatalogoRepository
+        let cache: CacheStore?
 
-        public init(ordens: OrdemServicoRepository, catalogo: CatalogoRepository) {
+        public init(ordens: OrdemServicoRepository, catalogo: CatalogoRepository,
+                    cache: CacheStore? = nil) {
             self.ordens = ordens
             self.catalogo = catalogo
+            self.cache = cache
         }
     }
 
@@ -42,7 +45,8 @@ public struct OrdensFlowView: View {
                 switch rota {
                 case .detalhe(let osId):
                     OrdemDetalheView(store: OrdemDetalheStore(osId: osId, ordens: deps.ordens,
-                                                              catalogo: deps.catalogo))
+                                                              catalogo: deps.catalogo,
+                                                              cache: deps.cache))
                 }
             }
         }

@@ -9,12 +9,14 @@ public struct GaragemFlowView: View {
         let veiculos: VeiculoRepository
         let ordens: OrdemServicoRepository
         let proprietarioId: UUID
+        let cache: CacheStore?
 
         public init(veiculos: VeiculoRepository, ordens: OrdemServicoRepository,
-                    proprietarioId: UUID) {
+                    proprietarioId: UUID, cache: CacheStore? = nil) {
             self.veiculos = veiculos
             self.ordens = ordens
             self.proprietarioId = proprietarioId
+            self.cache = cache
         }
     }
 
@@ -30,7 +32,7 @@ public struct GaragemFlowView: View {
 
     public init(deps: Dependencias) {
         self.deps = deps
-        self._store = State(initialValue: GaragemStore(veiculos: deps.veiculos))
+        self._store = State(initialValue: GaragemStore(veiculos: deps.veiculos, cache: deps.cache))
     }
 
     public var body: some View {
@@ -43,19 +45,21 @@ public struct GaragemFlowView: View {
                 case .detalhe(let veiculo):
                     VeiculoDetalheView(
                         store: VeiculoDetalheStore(veiculo: veiculo, veiculos: deps.veiculos,
-                                                   ordens: deps.ordens) {
+                                                   ordens: deps.ordens, cache: deps.cache) {
                             caminho = []
                         },
                         aoEditar: { caminho.append(.editar(veiculo)) })
                 case .novo:
                     VeiculoFormView(store: VeiculoFormStore(modo: .criar, veiculos: deps.veiculos,
-                                                            proprietarioId: deps.proprietarioId) { _ in
+                                                            proprietarioId: deps.proprietarioId,
+                                                            cache: deps.cache) { _ in
                         caminho = []
                     })
                 case .editar(let veiculo):
                     VeiculoFormView(store: VeiculoFormStore(modo: .editar(veiculo),
                                                             veiculos: deps.veiculos,
-                                                            proprietarioId: deps.proprietarioId) { _ in
+                                                            proprietarioId: deps.proprietarioId,
+                                                            cache: deps.cache) { _ in
                         caminho = []
                     })
                 }
@@ -73,6 +77,9 @@ struct GaragemView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DSSpacing.xl) {
+                if store.offline {
+                    STBanner("Offline — mostrando dados salvos")
+                }
                 switch store.fase {
                 case .carregando:
                     grade {

@@ -115,3 +115,16 @@ public enum StatusOrdemServico: Hashable, Sendable, CaseIterable {
         self == .entregue || self == .cancelada
     }
 }
+
+/// Codable para cache em disco (ADR-iOS-005): codifica o valor canônico da API
+/// e decodifica pelo mapeamento tolerante — cache antigo nunca quebra a leitura.
+extension StatusOrdemServico: Codable {
+    public init(from decoder: Decoder) throws {
+        self.init(rawAPI: try decoder.singleValueContainer().decode(String.self))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawAPI)
+    }
+}

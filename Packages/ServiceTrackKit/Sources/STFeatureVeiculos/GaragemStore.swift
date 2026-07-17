@@ -20,12 +20,18 @@ public final class GaragemStore {
     }
 
     public private(set) var fase: Fase = .carregando
+    /// Rede indisponível, exibindo cache (spec §11.3).
+    public private(set) var offline = false
 
     private let veiculos: VeiculoRepository
+    private let cache: CacheStore?
+    /// TTL de veículos: 10min (spec §11.2) — CRUD invalida antes disso.
+    private let ttl: TimeInterval = 600
     private var carregou = false
 
-    public init(veiculos: VeiculoRepository) {
+    public init(veiculos: VeiculoRepository, cache: CacheStore? = nil) {
         self.veiculos = veiculos
+        self.cache = cache
     }
 
     public func send(_ acao: Acao) {
@@ -40,15 +46,29 @@ public final class GaragemStore {
     }
 
     public func carregar(silencioso: Bool = false) async {
-        if !silencioso { fase = .carregando }
+        // SWR: cache primeiro (revisita sem skeleton — spec §11.2).
+        if !carregou, let cache,
+           let entrada = await cache.ler([Veiculo].self, chave: CacheChave.veiculos) {
+            fase = entrada.valor.isEmpty ? .vazio : .conteudo(entrada.valor)
+            carregou = true
+        } else if !silencioso && !carregou {
+            fase = .carregando
+        }
+
         do {
             let lista = try await veiculos.listar()
             fase = lista.isEmpty ? .vazio : .conteudo(lista)
+            offline = false
             carregou = true
+            await cache?.gravar(lista, chave: CacheChave.veiculos)
         } catch let erro as AppError {
-            if case .conteudo = fase { return }
+            if case .conteudo = fase {
+                if case .rede = erro { offline = true }
+                return
+            }
             fase = .erro(erro)
         } catch {
+            if case .conteudo = fase { offline = true; return }
             fase = .erro(.rede)
         }
     }
@@ -77,13 +97,15 @@ public final class VeiculoDetalheStore {
 
     private let veiculos: VeiculoRepository
     private let ordens: OrdemServicoRepository
+    private let cache: CacheStore?
     private let aoRemover: () -> Void
 
-    public init(veiculo: Veiculo, veiculos: VeiculoRepository,
-                ordens: OrdemServicoRepository, aoRemover: @escaping () -> Void) {
+    public init(veiculo: Veiculo, veiculos: VeiculoRepository, ordens: OrdemServicoRepository,
+                cache: CacheStore? = nil, aoRemover: @escaping () -> Void) {
         self.estado = Estado(veiculo: veiculo)
         self.veiculos = veiculos
         self.ordens = ordens
+        self.cache = cache
         self.aoRemover = aoRemover
     }
 
@@ -118,6 +140,7 @@ public final class VeiculoDetalheStore {
         Task {
             do {
                 try await veiculos.remover(id: estado.veiculo.id)
+                await cache?.invalidar(chaves: [CacheChave.veiculos, CacheChave.dashboard])
                 aoRemover()
             } catch let erro as AppError {
                 estado.erro = erro.mensagemPadrao
