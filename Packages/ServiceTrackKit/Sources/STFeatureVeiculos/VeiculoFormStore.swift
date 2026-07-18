@@ -1,10 +1,8 @@
 import Foundation
 import Observation
 import STDomain
+import STObservability
 
-/// Cadastro/edição de veículo em passos (spec §15.10):
-/// marca+modelo → galeria de sugestões (Unsplash) → ano+placa → salvar.
-/// Sugestões e FIPE são best-effort (RN-11): falha externa nunca bloqueia o salvar.
 @MainActor
 @Observable
 public final class VeiculoFormStore {
@@ -28,7 +26,6 @@ public final class VeiculoFormStore {
         public var sugestoes: [URL] = []
         public var imagemSelecionada: URL?
         public var buscandoSugestoes = false
-        /// Banner discreto quando o Unsplash falhou (RN-11) — segue sem imagem.
         public var sugestoesFalharam = false
         public var salvando = false
         public var erros: [Campo: String] = [:]
@@ -119,9 +116,8 @@ public final class VeiculoFormStore {
                 erros[.modelo] = "Informe o modelo."
             }
         case .imagem:
-            break // imagem é opcional (urlImagem nullable no contrato)
+            break
         case .dados:
-            // Contrato: ano >= 1886 (spec §4.2).
             if Int(estado.ano).map({ $0 < 1886 || $0 > 2100 }) ?? true {
                 erros[.ano] = "Informe um ano válido (a partir de 1886)."
             }
@@ -133,7 +129,6 @@ public final class VeiculoFormStore {
         return erros.isEmpty
     }
 
-    /// Best-effort (RN-11): erro vira banner, nunca bloqueio.
     private func buscarSugestoes() {
         guard estado.sugestoes.isEmpty else { return }
         estado.buscandoSugestoes = true
@@ -172,7 +167,7 @@ public final class VeiculoFormStore {
                                                          marca: marca, ano: ano,
                                                          urlImagem: estado.imagemSelecionada)
                 }
-                // CRUD de veículo invalida veículos + dashboard (spec §11.2).
+                Telemetria.registrar(modo == .criar ? "vehicle_create" : "vehicle_edit")
                 await cache?.invalidar(chaves: [CacheChave.veiculos, CacheChave.dashboard])
                 aoSalvar(salvo)
             } catch let erro as AppError {
@@ -185,7 +180,6 @@ public final class VeiculoFormStore {
     }
 }
 
-/// Normalização de placa para envio (RN-12: backend valida o formato final).
 enum STMascaraPlaca {
     static func normalizar(_ placa: String) -> String {
         placa.uppercased().filter { $0.isLetter || $0.isNumber }

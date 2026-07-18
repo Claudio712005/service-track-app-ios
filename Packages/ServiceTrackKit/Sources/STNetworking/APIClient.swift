@@ -1,13 +1,11 @@
 import Foundation
 import STDomain
+import STObservability
 
-/// Fornece o Bearer token da sessão ativa (spec §8.2). Implementado pelo SessionManager do app.
 public protocol AuthTokenProvider: Sendable {
     var token: String? { get }
 }
 
-/// Cliente HTTP contract-first (spec §11.1): injeta auth + trace-id,
-/// retry idempotente com backoff (spec §12.2) e mapeia erros para `AppError`.
 public struct APIClient: Sendable {
     public let baseURL: URL
     let transport: APITransport
@@ -24,8 +22,6 @@ public struct APIClient: Sendable {
         self.retryDelays = retryDelays
     }
 
-    // MARK: chamadas
-
     public func send<Response: Decodable>(_ endpoint: Endpoint) async throws -> Response {
         let data = try await sendRaw(endpoint)
         do {
@@ -35,16 +31,13 @@ public struct APIClient: Sendable {
         }
     }
 
-    /// Para respostas 204 (sem corpo).
     public func send(_ endpoint: Endpoint) async throws {
         _ = try await sendRaw(endpoint)
     }
 
-    // MARK: pipeline
 
     func sendRaw(_ endpoint: Endpoint) async throws -> Data {
         let request = try makeRequest(endpoint)
-        // Não idempotentes: sem retry automático para evitar dupla execução (RN-09).
         let tentativas = endpoint.isIdempotente ? retryDelays.count + 1 : 1
         var ultimoErro: Error = AppError.rede
 
@@ -53,8 +46,10 @@ public struct APIClient: Sendable {
                 let jitter = Duration.milliseconds(Int.random(in: 0...100))
                 try await Task.sleep(for: retryDelays[tentativa - 1] + jitter)
             }
+            let inicio = ContinuousClock.now
             do {
                 let (data, response) = try await transport.send(request)
+                logar(request, status: response.statusCode, inicio: inicio)
                 guard (200..<300).contains(response.statusCode) else {
                     let erro = ErrorMapper.map(status: response.statusCode, data: data,
                                                headers: response.allHeaderFields)
@@ -69,11 +64,26 @@ public struct APIClient: Sendable {
             } catch let erro as AppError {
                 throw erro
             } catch {
+                logar(request, status: nil, inicio: inicio)
                 ultimoErro = AppError.rede
                 if !endpoint.isIdempotente { break }
             }
         }
         throw ultimoErro
+    }
+
+    private func logar(_ request: URLRequest, status: Int?, inicio: ContinuousClock.Instant) {
+        #if canImport(os)
+        let ms = (ContinuousClock.now - inicio).components.attoseconds / 1_000_000_000_000_000
+        let metodo = request.httpMethod ?? "?"
+        let caminho = request.url?.path ?? "?"
+        let requestId = request.value(forHTTPHeaderField: "X-Request-Id") ?? "-"
+        if let status {
+            STLog.network.info("\(metodo, privacy: .public) \(caminho, privacy: .public) status=\(status) duracao=\(ms)ms rid=\(requestId, privacy: .public)")
+        } else {
+            STLog.network.error("\(metodo, privacy: .public) \(caminho, privacy: .public) falha=rede duracao=\(ms)ms rid=\(requestId, privacy: .public)")
+        }
+        #endif
     }
 
     func makeRequest(_ endpoint: Endpoint) throws -> URLRequest {
@@ -93,7 +103,6 @@ public struct APIClient: Sendable {
         if endpoint.body != nil {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
-        // Trace-id por request para correlação com o backend (spec §11.1/§17.1).
         request.setValue(UUID().uuidString, forHTTPHeaderField: "X-Request-Id")
         if let token = tokenProvider?.token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

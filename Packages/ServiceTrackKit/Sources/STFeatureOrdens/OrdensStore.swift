@@ -1,11 +1,8 @@
 import Foundation
 import Observation
 import STDomain
+import STObservability
 
-/// Lista de OS (spec §15.4): filtro por status + paginação infinita.
-/// "Ativas" e "Concluídas" agregam vários estados — o contrato só aceita um
-/// `status` por chamada, então esses dois filtram client-side sobre as páginas
-/// carregadas (documentado na spec §15.4).
 @MainActor
 @Observable
 public final class OrdensStore {
@@ -22,7 +19,6 @@ public final class OrdensStore {
             }
         }
 
-        /// Status enviado na query quando o filtro é 1:1 com um estado.
         var statusQuery: StatusOrdemServico? {
             switch self {
             case .aguardandoAprovacao: .aguardandoAprovacao
@@ -31,7 +27,6 @@ public final class OrdensStore {
             }
         }
 
-        /// Predicado client-side para filtros agregados.
         func inclui(_ status: StatusOrdemServico) -> Bool {
             switch self {
             case .todas: true
@@ -57,7 +52,6 @@ public final class OrdensStore {
         public var carregandoMais = false
         public var temMais = false
 
-        /// Lista exibida — aplica o predicado do filtro agregado.
         public var visiveis: [ResumoOrdemServico] {
             ordens.filter { filtro.inclui($0.status) }
         }
@@ -84,12 +78,14 @@ public final class OrdensStore {
     public func send(_ acao: Acao) {
         switch acao {
         case .aparecer:
+            Telemetria.registrar("order_list_view", ["filter": "todas"])
             if estado.ordens.isEmpty { recomecar() }
         case .recarregar:
             recomecar()
         case .filtroAlterado(let filtro):
             guard filtro != estado.filtro else { return }
             estado.filtro = filtro
+            Telemetria.registrar("order_list_view", ["filter": "\(filtro)"])
             recomecar()
         case .chegouAoFim:
             carregarMais()

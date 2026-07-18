@@ -1,4 +1,3 @@
-// swift-tools-version: 5.9
 import PackageDescription
 
 let package = Package(
@@ -7,6 +6,7 @@ let package = Package(
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
         .library(name: "STDomain", targets: ["STDomain"]),
+        .library(name: "STObservability", targets: ["STObservability"]),
         .library(name: "STCore", targets: ["STCore"]),
         .library(name: "STNetworking", targets: ["STNetworking"]),
         .library(name: "STPersistence", targets: ["STPersistence"]),
@@ -21,19 +21,21 @@ let package = Package(
     ],
     targets: [
         .target(name: "STDomain"),
+        .target(name: "STObservability"),
         .target(name: "STCore", dependencies: ["STDomain"]),
-        .target(name: "STNetworking", dependencies: ["STDomain"]),
+        .target(name: "STNetworking", dependencies: ["STDomain", "STObservability"]),
         .target(name: "STPersistence", dependencies: ["STDomain"]),
         .target(name: "STData", dependencies: ["STDomain", "STNetworking"]),
-        .target(name: "STFeatureAuth", dependencies: ["STDomain", "STCore"]),
-        .target(name: "STFeaturePerfil", dependencies: ["STDomain", "STCore"]),
-        .target(name: "STFeatureDashboard", dependencies: ["STDomain", "STCore"]),
-        .target(name: "STFeatureVeiculos", dependencies: ["STDomain", "STCore"]),
-        .target(name: "STFeatureOrdens", dependencies: ["STDomain", "STCore"]),
-        .target(name: "STFeatureNotificacoes", dependencies: ["STDomain", "STCore"]),
-        .target(name: "STFeatureCatalogo", dependencies: ["STDomain", "STCore"]),
+        .target(name: "STFeatureAuth", dependencies: ["STDomain", "STCore", "STObservability"]),
+        .target(name: "STFeaturePerfil", dependencies: ["STDomain", "STCore", "STObservability"]),
+        .target(name: "STFeatureDashboard", dependencies: ["STDomain", "STCore", "STObservability"]),
+        .target(name: "STFeatureVeiculos", dependencies: ["STDomain", "STCore", "STObservability"]),
+        .target(name: "STFeatureOrdens", dependencies: ["STDomain", "STCore", "STObservability"]),
+        .target(name: "STFeatureNotificacoes", dependencies: ["STDomain", "STCore", "STObservability"]),
+        .target(name: "STFeatureCatalogo", dependencies: ["STDomain", "STCore", "STObservability"]),
         .testTarget(name: "STDomainTests", dependencies: ["STDomain"]),
         .testTarget(name: "STPersistenceTests", dependencies: ["STPersistence"]),
+        .testTarget(name: "STObservabilityTests", dependencies: ["STObservability"]),
         .testTarget(name: "STNetworkingTests", dependencies: ["STNetworking"]),
         .testTarget(name: "STDataTests", dependencies: ["STData"]),
         .testTarget(name: "STFeatureAuthTests", dependencies: ["STFeatureAuth"]),

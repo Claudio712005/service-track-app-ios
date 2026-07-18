@@ -1,9 +1,8 @@
 import Foundation
 import Observation
 import STDomain
+import STObservability
 
-/// Detalhe da OS (spec §15.6/§15.7): timeline, orçamento, itens, ações por
-/// estado (§5.3). Ações devolvem resumo → refetch do detalhe (ADR-iOS-002 D3).
 @MainActor
 @Observable
 public final class OrdemDetalheStore {
@@ -21,7 +20,6 @@ public final class OrdemDetalheStore {
         public var erroAcao: String?
         public var sucessoAcao: String?
 
-        /// Contagem agregada de insumos (IDs repetidos por quantidade — spec §15.6).
         public var insumosAgregados: [(id: UUID, quantidade: Int)] {
             guard let ordem else { return [] }
             return Dictionary(grouping: ordem.insumos, by: \.self)
@@ -35,7 +33,6 @@ public final class OrdemDetalheStore {
         case recarregar
         case aprovar
         case reprovar(motivo: String)
-        /// RN-06: motivo opcional.
         case cancelar(motivo: String?)
         case limparFeedback
     }
@@ -62,18 +59,26 @@ public final class OrdemDetalheStore {
         case .recarregar:
             Task { await carregar() }
         case .aprovar:
+            let faixa = estado.ordem?.orcamento.map { Telemetria.faixaDeValor($0.valorTotal) } ?? "-"
             executar { [ordens, osId] in
                 _ = try await ordens.aprovarOrcamento(osId: osId)
+                Telemetria.registrar("budget_approve", ["os_id_hash": Telemetria.pseudonimo(osId),
+                                                        "valor_faixa": faixa])
                 return "Orçamento aprovado! Serviço entrando em execução."
             }
         case .reprovar(let motivo):
             executar { [ordens, osId] in
                 _ = try await ordens.reprovarOrcamento(osId: osId, motivo: motivo)
+                Telemetria.registrar("budget_reject", ["os_id_hash": Telemetria.pseudonimo(osId),
+                                                       "motivo_len": String(motivo.count)])
                 return "Solicitação registrada. O orçamento foi reprovado."
             }
         case .cancelar(let motivo):
+            let origem = estado.ordem?.status.rawAPI ?? "-"
             executar { [ordens, osId] in
                 _ = try await ordens.cancelar(osId: osId, motivo: motivo)
+                Telemetria.registrar("order_cancel", ["os_id_hash": Telemetria.pseudonimo(osId),
+                                                      "status_origem": origem])
                 return "Ordem de serviço cancelada."
             }
         case .limparFeedback:
@@ -86,8 +91,12 @@ public final class OrdemDetalheStore {
         if estado.ordem == nil { estado.fase = .carregando }
         do {
             let ordem = try await ordens.buscar(id: osId)
+            let primeiraCarga = estado.ordem == nil
             estado.ordem = ordem
             estado.fase = .conteudo
+            if primeiraCarga {
+                Telemetria.registrar("order_detail_view", ["status": ordem.status.rawAPI])
+            }
             await carregarNomesInsumos(ordem)
         } catch let erro as AppError {
             if estado.ordem == nil { estado.fase = .erro(erro) }
@@ -97,7 +106,6 @@ public final class OrdemDetalheStore {
         }
     }
 
-    /// Nomes via catálogo (cache-first nas fases futuras); falha não quebra a tela.
     private func carregarNomesInsumos(_ ordem: OrdemServico) async {
         guard !ordem.insumos.isEmpty, estado.nomesInsumos.isEmpty else { return }
         if let insumos = try? await catalogo.insumos() {
@@ -105,8 +113,6 @@ public final class OrdemDetalheStore {
         }
     }
 
-    /// Sem retry automático em ação (RN-09); 409 = decidido por outro canal
-    /// (RN-07) → mensagem + refetch mostrando o estado atual.
     private func executar(_ operacao: @escaping () async throws -> String) {
         guard !estado.decidindo else { return }
         estado.decidindo = true
@@ -124,7 +130,6 @@ public final class OrdemDetalheStore {
             } catch {
                 estado.erroAcao = AppError.rede.mensagemPadrao
             }
-            // Ação em OS invalida o dashboard cacheado (spec §11.2).
             await cache?.invalidar(chaves: [CacheChave.dashboard])
             await carregar()
             estado.decidindo = false

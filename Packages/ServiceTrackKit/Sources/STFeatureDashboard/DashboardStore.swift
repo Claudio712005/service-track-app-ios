@@ -1,17 +1,14 @@
 import Foundation
 import Observation
 import STDomain
+import STObservability
 
-/// Store do Dashboard (spec §15.3): busca dashboard + contador de não lidas em
-/// paralelo (§10.4), deriva séries dos gráficos e executa a decisão de
-/// orçamento com refetch (RN-04/RN-07).
 @MainActor
 @Observable
 public final class DashboardStore {
     public enum Fase: Equatable {
         case carregando
         case conteudo
-        /// Cliente novo: 0 ordens e 0 veículos (empty ilustrado com CTA — §15.3).
         case vazio
         case erro(AppError)
     }
@@ -23,16 +20,13 @@ public final class DashboardStore {
         public var decidindo = false
         public var erroAcao: String?
         public var sucessoAcao: String?
-        /// Rede indisponível, exibindo cache (spec §11.3 — banner sutil).
         public var offline = false
 
-        /// OS aguardando decisão do cliente — card "Precisa da sua atenção" (RF07).
         public var pendenteDeAprovacao: OrdemAtivaDashboard? {
             dashboard?.ordensAtivas.first { $0.status == .aguardandoAprovacao }
         }
     }
 
-    /// Ponto de uma série de gráfico (rótulo + valor em BRL).
     public struct PontoGasto: Equatable, Identifiable {
         public let id: String
         public let rotulo: String
@@ -72,7 +66,6 @@ public final class DashboardStore {
     private let ordens: OrdemServicoRepository
     private let clienteId: UUID
     private let cache: CacheStore?
-    /// TTL do dashboard (spec §11.2): vencido só força revalidação, não descarta.
     private let ttl: TimeInterval = 60
 
     public init(dashboard: DashboardRepository, notificacoes: NotificacaoRepository,
@@ -87,11 +80,11 @@ public final class DashboardStore {
     public func send(_ acao: Acao) {
         switch acao {
         case .aparecer:
+            Telemetria.registrar("dashboard_view")
             if estado.dashboard == nil { Task { await carregar(forcar: false) } }
         case .recarregar:
             Task { await carregar() }
         case .voltouAoForeground:
-            // Revalidação em foreground (spec §11.3) — silenciosa, sem skeleton.
             if estado.dashboard != nil { Task { await carregar() } }
         case .aprovarOrcamento(let osId):
             decidir(osId: osId, motivo: nil)
@@ -103,9 +96,6 @@ public final class DashboardStore {
         }
     }
 
-    /// SWR (spec §11.2): emite o cache primeiro (revisita sem skeleton) e
-    /// revalida na rede; rede fora + cache presente → banner offline (§11.3).
-    /// Também chamado pelo pull-to-refresh da view (aguardável).
     public func carregar(forcar: Bool = true) async {
         var cacheFresco = false
         if estado.dashboard == nil,
@@ -115,11 +105,9 @@ public final class DashboardStore {
             cacheFresco = !entrada.vencida(ttl: ttl)
         }
         if estado.dashboard == nil { estado.fase = .carregando }
-        // Cache dentro do TTL e sem forçar: revisita instantânea, sem rede.
         if cacheFresco && !forcar { return }
 
         do {
-            // RN-02: id do path é sempre o da sessão.
             async let dash = dashboard.buscar(clienteId: clienteId)
             async let contagem = notificacoes.contagemNaoLidas()
             let (d, n) = try await (dash, contagem)
@@ -129,8 +117,10 @@ public final class DashboardStore {
             await cache?.gravar(d, chave: CacheChave.dashboard)
         } catch let erro as AppError {
             if estado.dashboard == nil {
+                Telemetria.registrar("error_shown", ["tela": "dashboard", "tipo": "\(erro)"])
                 estado.fase = .erro(erro)
             } else if case .rede = erro {
+                if !estado.offline { Telemetria.registrar("offline_banner_shown", ["tela": "dashboard"]) }
                 estado.offline = true
             } else {
                 estado.erroAcao = erro.mensagemPadrao
@@ -147,8 +137,6 @@ public final class DashboardStore {
             ? .vazio : .conteudo
     }
 
-    /// Aprovar (motivo nil) ou reprovar (RN-05: motivo obrigatório). Sem retry
-    /// automático (RN-09); 409 = decidido por outro canal (RN-07) → refetch.
     private func decidir(osId: UUID, motivo: String?) {
         guard !estado.decidindo else { return }
         estado.decidindo = true
@@ -159,9 +147,12 @@ public final class DashboardStore {
                 if let motivo {
                     _ = try await ordens.reprovarOrcamento(osId: osId, motivo: motivo)
                     estado.sucessoAcao = "Solicitação registrada. O orçamento foi reprovado."
+                    Telemetria.registrar("budget_reject", ["os_id_hash": Telemetria.pseudonimo(osId),
+                                                           "motivo_len": String(motivo.count)])
                 } else {
                     _ = try await ordens.aprovarOrcamento(osId: osId)
                     estado.sucessoAcao = "Orçamento aprovado! Serviço entrando em execução."
+                    Telemetria.registrar("budget_approve", ["os_id_hash": Telemetria.pseudonimo(osId)])
                 }
             } catch let erro as AppError {
                 if case .conflitoEstado = erro {
@@ -179,9 +170,6 @@ public final class DashboardStore {
         }
     }
 
-    // MARK: - Séries derivadas para os gráficos
-
-    /// Gasto acumulado por veículo (fonte: `veiculos[].total_gasto`), maior primeiro.
     public var gastoPorVeiculo: [PontoGasto] {
         (estado.dashboard?.veiculos ?? [])
             .compactMap { veiculo -> PontoGasto? in
@@ -193,8 +181,6 @@ public final class DashboardStore {
             .sorted { $0.valor > $1.valor }
     }
 
-    /// Gastos por mês de conclusão (fonte: `ordens_recentes[].valor_total`),
-    /// ordem cronológica.
     public var gastosPorMes: [PontoMensal] {
         let calendario = Calendar.current
         let porMes = Dictionary(grouping: (estado.dashboard?.ordensRecentes ?? [])
@@ -210,7 +196,6 @@ public final class DashboardStore {
             .sorted { $0.mes < $1.mes }
     }
 
-    /// Total investido (soma da série por veículo) — rodapé/contexto dos gráficos.
     public var totalInvestido: Double {
         gastoPorVeiculo.reduce(0) { $0 + $1.valor }
     }

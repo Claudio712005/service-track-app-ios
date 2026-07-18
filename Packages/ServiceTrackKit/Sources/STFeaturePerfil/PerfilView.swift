@@ -2,21 +2,21 @@ import SwiftUI
 import STCore
 import STDomain
 
-/// Perfil (spec §15.12): cabeçalho com avatar, edição de dados, alteração de
-/// senha, preferências, sair e desativar conta. Inclui a orientação de
-/// recuperação de senha (spec §9 C6 — não existe endpoint público).
 public struct PerfilView: View {
     @State private var store: PerfilStore
     @Binding var biometriaHabilitada: Bool
+    @Binding var analyticsHabilitada: Bool
     let aoAbrirCatalogo: (() -> Void)?
     @State private var mostrandoEditar = false
     @State private var mostrandoSenha = false
     @State private var mostrandoDesativar = false
 
     public init(store: PerfilStore, biometriaHabilitada: Binding<Bool>,
+                analyticsHabilitada: Binding<Bool> = .constant(true),
                 aoAbrirCatalogo: (() -> Void)? = nil) {
         self._store = State(initialValue: store)
         self._biometriaHabilitada = biometriaHabilitada
+        self._analyticsHabilitada = analyticsHabilitada
         self.aoAbrirCatalogo = aoAbrirCatalogo
     }
 
@@ -127,6 +127,15 @@ public struct PerfilView: View {
             }
             .tint(DSColor.brandPrimary)
             .frame(minHeight: DSSpacing.alvoMinimo)
+            Divider()
+            // Consentimento de analytics (spec §17.3, ADR-iOS-006).
+            Toggle(isOn: $analyticsHabilitada) {
+                Label("Compartilhar estatísticas de uso", systemImage: "chart.bar.xaxis")
+                    .font(DSFont.body)
+                    .foregroundStyle(DSColor.textPrimary)
+            }
+            .tint(DSColor.brandPrimary)
+            .frame(minHeight: DSSpacing.alvoMinimo)
         }
     }
 
@@ -213,8 +222,6 @@ public struct PerfilView: View {
         .buttonStyle(.plain)
     }
 }
-
-// MARK: - Sheets
 
 private struct EditarDadosSheet: View {
     @Bindable var store: PerfilStore

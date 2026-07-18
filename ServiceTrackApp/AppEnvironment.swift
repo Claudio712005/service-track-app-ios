@@ -4,8 +4,8 @@ import STDomain
 import STNetworking
 import STPersistence
 import STData
+import STObservability
 
-/// Fornece o token da sessão ao APIClient fora do MainActor.
 final class TokenBox: AuthTokenProvider, @unchecked Sendable {
     private let lock = NSLock()
     private var valor: String?
@@ -19,8 +19,6 @@ final class TokenBox: AuthTokenProvider, @unchecked Sendable {
     }
 }
 
-/// Composition root (spec §10.2 DI): protocolos injetados por inicializador;
-/// previews e testes usam fakes.
 @Observable
 final class AppEnvironment {
     let auth: AuthRepository
@@ -31,21 +29,16 @@ final class AppEnvironment {
     let notificacoes: NotificacaoRepository
     let catalogo: CatalogoRepository
     let sessaoStore: SessaoStore
-    /// Preferências por instalação (onboarding, biometria) — ADR-iOS-004.
     let preferencias = PreferenciasLocais()
-    /// Cache de leitura SWR em disco (ADR-iOS-005).
     let cache: CacheStore = DiscoCache()
 
     private let tokenBox = TokenBox()
     private(set) var sessao: Sessao?
 
     init() {
-        // Base URL sobrescrevível por env (paridade com SERVICETRACK_API_BASE_URL — spec §20).
         let env = ProcessInfo.processInfo.environment
         let baseURL = URL(string: env["SERVICETRACK_API_BASE_URL"] ?? "http://localhost:8080")!
 
-        // Ambiente local com mocks (fixtures do OpenAPI). Backend real: rodar o
-        // scheme com SERVICETRACK_MOCK=0 (exceção ATS restrita a localhost).
         let transport: APITransport
         #if DEBUG
         transport = env["SERVICETRACK_MOCK"] == "0" ? URLSessionTransport() : MockTransport()
@@ -68,9 +61,13 @@ final class AppEnvironment {
             sessao = salva
             tokenBox.atualizar(salva.token)
         }
+
+        let prefs = preferencias
+        Telemetria.configurar(cliente: AnalyticsOSLog(),
+                              habilitada: { prefs.analyticsHabilitada })
+        Telemetria.registrar("app_open")
     }
 
-    /// Efetiva o login: role gate CLIENTE (spec §8.2 item 4) + persistência no Keychain.
     func iniciarSessao(_ sessao: Sessao) throws {
         guard sessao.isCliente else {
             throw AppError.regraNegocio("Este app é exclusivo para clientes.")
@@ -80,7 +77,6 @@ final class AppEnvironment {
         self.sessao = sessao
     }
 
-    /// Logout (spec §8.2 item 6): apaga o Keychain e limpa o cache sensível.
     func encerrarSessao() {
         try? sessaoStore.limpar()
         tokenBox.atualizar(nil)
@@ -92,8 +88,6 @@ final class AppEnvironment {
     }
 
     #if DEBUG
-    /// Atalho de desenvolvimento: `ST_AUTOLOGIN=1` no scheme/`SIMCTL_CHILD_` faz
-    /// login automático contra o mock. Nunca compila em Release.
     func autologinDebugSeNecessario() async {
         guard sessao == nil,
               ProcessInfo.processInfo.environment["ST_AUTOLOGIN"] == "1",
@@ -103,7 +97,6 @@ final class AppEnvironment {
     }
     #endif
 
-    /// Após `PUT /clientes/{id}`, espelha nome/e-mail na sessão persistida.
     func atualizarPerfil(_ cliente: Cliente) {
         guard let atual = sessao else { return }
         let nova = Sessao(token: atual.token, usuarioId: atual.usuarioId,

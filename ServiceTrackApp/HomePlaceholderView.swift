@@ -6,8 +6,6 @@ import STFeaturePerfil
 import STFeatureDashboard
 import STFeatureCatalogo
 
-/// Home autenticada: Dashboard (spec §15.3) + acesso ao Perfil.
-/// TabBar customizada com Ordens/Garagem/Notificações chega nas próximas fases.
 struct HomePlaceholderView: View {
     @Environment(AppEnvironment.self) private var env
     let sessao: Sessao
@@ -49,7 +47,9 @@ struct HomePlaceholderView: View {
                 .navigationDestination(for: Rota.self) { rota in
                     switch rota {
                     case .perfil:
-                        PerfilView(store: perfilStore, biometriaHabilitada: biometriaBinding) {
+                        PerfilView(store: perfilStore,
+                                   biometriaHabilitada: biometriaBinding,
+                                   analyticsHabilitada: analyticsBinding) {
                             caminho.append(.catalogo)
                         }
                     case .catalogo:
@@ -72,5 +72,10 @@ struct HomePlaceholderView: View {
     private var biometriaBinding: Binding<Bool> {
         Binding(get: { env.preferencias.biometriaHabilitada },
                 set: { env.preferencias.biometriaHabilitada = $0 })
+    }
+
+    private var analyticsBinding: Binding<Bool> {
+        Binding(get: { env.preferencias.analyticsHabilitada },
+                set: { env.preferencias.analyticsHabilitada = $0 })
     }
 }

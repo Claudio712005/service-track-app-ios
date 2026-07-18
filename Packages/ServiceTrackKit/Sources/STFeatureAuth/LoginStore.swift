@@ -1,10 +1,8 @@
 import Foundation
 import Observation
 import STDomain
+import STObservability
 
-/// Store unidirecional do Login (spec §10.2): estado exposto somente leitura,
-/// mutação via `send(_:)`. Efetivação da sessão (role gate + Keychain) é do
-/// composition root, injetada em `aoAutenticar`.
 @MainActor
 @Observable
 public final class LoginStore {
@@ -15,7 +13,6 @@ public final class LoginStore {
         public var erroEmail: String?
         public var erroSenha: String?
         public var erroGeral: String?
-        /// Backoff visível de rate limit (spec §12.3) — CTA bloqueado com contador.
         public var segundosBloqueio = 0
 
         public var podeEnviar: Bool { !carregando && segundosBloqueio == 0 }
@@ -63,6 +60,7 @@ public final class LoginStore {
                 let sessao = try await auth.login(email: estado.email.trimmingCharacters(in: .whitespaces),
                                                   senha: estado.senha)
                 try aoAutenticar(sessao)
+                Telemetria.registrar("login_success")
             } catch let erro as AppError {
                 tratar(erro)
             } catch {
@@ -81,14 +79,23 @@ public final class LoginStore {
     }
 
     private func tratar(_ erro: AppError) {
+        Telemetria.registrar("login_fail", ["reason": rotuloDeFalha(erro)])
         switch erro {
         case .naoAutenticado:
             estado.erroGeral = "E-mail ou senha incorretos."
         case .rateLimited(let retryAfter):
-            // Janela do login é 20/min (spec §8.4); sem Retry-After, espera 30s.
             iniciarBloqueio(segundos: Int((retryAfter ?? 30).rounded()))
         default:
             estado.erroGeral = erro.mensagemPadrao
+        }
+    }
+
+    private func rotuloDeFalha(_ erro: AppError) -> String {
+        switch erro {
+        case .naoAutenticado: "credenciais"
+        case .rateLimited: "rate_limit"
+        case .rede: "rede"
+        default: "outro"
         }
     }
 

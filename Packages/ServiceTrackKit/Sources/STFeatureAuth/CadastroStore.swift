@@ -1,9 +1,8 @@
 import Foundation
 import Observation
 import STDomain
+import STObservability
 
-/// Cadastro em 3 passos (spec §15.1): (1) nome+email, (2) CPF+telefone+nascimento,
-/// (3) senha com medidor. Sucesso → auto-login → `aoAutenticar`.
 @MainActor
 @Observable
 public final class CadastroStore {
@@ -19,7 +18,6 @@ public final class CadastroStore {
         public var email = ""
         public var cpf = ""
         public var telefone = ""
-        /// Default: campo obriga escolha consciente, mas parte de uma data plausível.
         public var dataNascimento = Calendar.current.date(byAdding: .year, value: -25, to: .now) ?? .now
         public var senha = ""
         public var confirmacaoSenha = ""
@@ -97,7 +95,6 @@ public final class CadastroStore {
         }
     }
 
-    /// RN-12: validação local para UX imediata; backend é a autoridade final.
     func validar(_ etapa: Etapa) -> Bool {
         var erros: [Campo: String] = [:]
         switch etapa {
@@ -145,7 +142,7 @@ public final class CadastroStore {
                     dataNascimento: estado.dataNascimento,
                     telefone: estado.telefone.filter(\.isNumber),
                     cpf: estado.cpf.filter(\.isNumber))
-                // Auto-login pós-cadastro (spec §15.1).
+                Telemetria.registrar("signup_completed")
                 let sessao = try await auth.login(email: email, senha: estado.senha)
                 try aoAutenticar(sessao)
             } catch let erro as AppError {
@@ -160,7 +157,6 @@ public final class CadastroStore {
     private func tratar(_ erro: AppError) {
         switch erro {
         case .rateLimited(let retryAfter):
-            // Janela do cadastro é 10/min (spec §8.4).
             iniciarBloqueio(segundos: Int((retryAfter ?? 60).rounded()))
         case .validacao(_, let mensagem), .regraNegocio(let mensagem):
             estado.erroGeral = mensagem

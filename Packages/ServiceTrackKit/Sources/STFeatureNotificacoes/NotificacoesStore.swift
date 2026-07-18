@@ -1,10 +1,8 @@
 import Foundation
 import Observation
 import STDomain
+import STObservability
 
-/// Central de notificações (spec §15.11, RF09): contador de não lidas, filtro
-/// Todas/Não lidas (query `visualizada=false`), paginação e marcação de leitura
-/// com decremento otimista do contador.
 @MainActor
 @Observable
 public final class NotificacoesStore {
@@ -18,7 +16,6 @@ public final class NotificacoesStore {
             }
         }
 
-        /// Query do contrato: `visualizada=false` para não lidas; sem filtro para todas.
         var apenasNaoLidas: Bool? {
             self == .naoLidas ? true : nil
         }
@@ -47,7 +44,6 @@ public final class NotificacoesStore {
         case recarregar
         case filtroAlterado(Filtro)
         case chegouAoFim
-        /// Chamada ao abrir o detalhe (spec §15.11: tap → detalhe + visualizar).
         case abrir(Notificacao)
         case marcarTodasComoLidas
         case limparFeedback
@@ -104,8 +100,6 @@ public final class NotificacoesStore {
     private func carregarPagina(reset: Bool) async {
         if reset { pagina = 0 }
         do {
-            // Lista + contador em paralelo (spec §10.4); contador é fonte única
-            // do backend, não recalculado da página (paginação truncaria).
             async let paginaAsync = repo.listar(apenasNaoLidas: estado.filtro.apenasNaoLidas,
                                                 page: pagina, size: tamanhoPagina)
             async let contagemAsync = repo.contagemNaoLidas()
@@ -126,9 +120,8 @@ public final class NotificacoesStore {
         estado.carregandoMais = false
     }
 
-    /// Otimista (spec §15.11): marca lida + decrementa contador na hora;
-    /// reverte se o PATCH falhar.
     private func marcarVisualizada(_ notificacao: Notificacao) {
+        Telemetria.registrar("notification_open", ["id_hash": Telemetria.pseudonimo(notificacao.id)])
         guard !notificacao.visualizada,
               let indice = estado.notificacoes.firstIndex(where: { $0.id == notificacao.id }) else {
             return
@@ -151,7 +144,6 @@ public final class NotificacoesStore {
         }
     }
 
-    /// Ação em massa (spec §15.11, opcional): itera visualizar nas não lidas carregadas.
     private func marcarTodas() {
         let pendentes = estado.notificacoes.filter { !$0.visualizada }
         guard !pendentes.isEmpty, !estado.marcandoTodas else { return }
