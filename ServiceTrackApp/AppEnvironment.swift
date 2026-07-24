@@ -5,6 +5,9 @@ import STNetworking
 import STPersistence
 import STData
 import STObservability
+#if canImport(UserNotifications)
+import UserNotifications
+#endif
 
 final class TokenBox: AuthTokenProvider, @unchecked Sendable {
     private let lock = NSLock()
@@ -81,10 +84,14 @@ final class AppEnvironment {
         try? sessaoStore.limpar()
         tokenBox.atualizar(nil)
         sessao = nil
+        preferencias.ultimaContagemNaoLidas = 0
         Task { [cache] in
             await cache.invalidar(chaves: [CacheChave.dashboard, CacheChave.veiculos,
                                            CacheChave.catalogo])
         }
+        #if canImport(UserNotifications)
+        Task { try? await UNUserNotificationCenter.current().setBadgeCount(0) }
+        #endif
     }
 
     #if DEBUG

@@ -7,6 +7,7 @@ public struct PreferenciasLocais: Sendable {
         static let onboardingVisto = "st.onboardingVisto"
         static let biometriaHabilitada = "st.biometriaHabilitada"
         static let analyticsHabilitada = "st.analyticsHabilitada"
+        static let ultimaContagemNaoLidas = "st.ultimaContagemNaoLidas"
     }
 
     public init(defaults: UserDefaults = .standard) {
@@ -26,5 +27,10 @@ public struct PreferenciasLocais: Sendable {
     public var analyticsHabilitada: Bool {
         get { defaults.object(forKey: Chave.analyticsHabilitada) as? Bool ?? true }
         nonmutating set { defaults.set(newValue, forKey: Chave.analyticsHabilitada) }
+    }
+
+    public var ultimaContagemNaoLidas: Int {
+        get { defaults.integer(forKey: Chave.ultimaContagemNaoLidas) }
+        nonmutating set { defaults.set(newValue, forKey: Chave.ultimaContagemNaoLidas) }
     }
 }

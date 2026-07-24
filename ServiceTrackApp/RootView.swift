@@ -4,18 +4,19 @@ import STDomain
 import STPersistence
 import STFeatureAuth
 
-/// Raiz do app: onboarding (1º acesso) → autenticação → home.
-/// Sessão persistida + biometria habilitada → gate de desbloqueio (spec §8.4).
 struct RootView: View {
     @Environment(AppEnvironment.self) private var env
     @Environment(\.scenePhase) private var scenePhase
     @State private var desbloqueado = false
 
+    private var monitor: NotificacoesBadgeMonitor {
+        NotificacoesBadgeMonitor(notificacoes: env.notificacoes, preferencias: env.preferencias)
+    }
+
     var body: some View {
         ZStack {
             conteudo
 
-            // Proteção de tela no app switcher (spec §8.4).
             if scenePhase != .active {
                 overlayPrivacidade
             }
@@ -25,6 +26,16 @@ struct RootView: View {
             #if DEBUG
             await env.autologinDebugSeNecessario()
             #endif
+        }
+        .onChange(of: scenePhase) { _, nova in
+            if nova == .active, env.sessao != nil {
+                Task { await monitor.sincronizar() }
+            }
+        }
+        .task(id: env.sessao?.usuarioId) {
+            guard env.sessao != nil else { return }
+            monitor.pedirAutorizacaoSeNecessario()
+            await monitor.sincronizar()
         }
     }
 
@@ -65,7 +76,6 @@ struct RootView: View {
     }
 }
 
-/// Desbloqueio por Face ID/Touch ID da sessão persistida (spec §8.4).
 private struct BiometriaGateView: View {
     let nome: String
     let aoDesbloquear: () -> Void
