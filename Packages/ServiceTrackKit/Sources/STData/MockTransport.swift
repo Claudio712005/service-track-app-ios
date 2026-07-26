@@ -42,10 +42,9 @@ public final class MockTransport: APITransport, @unchecked Sendable {
 
     private func resposta(metodo: String, caminho: String, query: String) -> (Int, String) {
         switch (metodo, caminho) {
-        // login: rota da spec e rota do índice OpenAPI (ADR-iOS-002 D4)
-        case ("POST", "/autenticacao/login"), ("POST", "/autenticacao"):
+        case ("POST", "/autenticacao"):
             return (200, MockFixtures.loginResponse)
-        case ("POST", "/autenticacao/reset-senha"):
+        case ("PUT", "/usuarios/senha"):
             return (204, "")
 
         case ("POST", "/clientes"):
