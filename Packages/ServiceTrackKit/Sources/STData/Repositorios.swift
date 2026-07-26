@@ -12,16 +12,19 @@ public struct AuthRepositoryHTTP: AuthRepository {
         self.client = client
     }
 
-    public func login(email: String, senha: String) async throws -> Sessao {
-        let body = try STJSON.encoder.encode(LoginRequestDTO(email: email, senha: senha))
+    public func login(cpf: String, senha: String) async throws -> Sessao {
+        let body = try STJSON.encoder.encode(LoginRequestDTO(cpf: cpf, senha: senha))
         let dto: LoginResponseDTO = try await client.send(ServiceTrackAPI.login(body))
-        return dto.domain
+        guard let sessao = dto.domain else {
+            throw AppError.decoding("Token de autenticação sem identificador de usuário.")
+        }
+        return sessao
     }
 
     public func alterarSenha(senhaAtual: String, novaSenha: String, confirmacao: String) async throws {
-        let body = try STJSON.encoder.encode(ResetarSenhaRequestDTO(
+        let body = try STJSON.encoder.encode(AlterarSenhaRequestDTO(
             senhaAtual: senhaAtual, novaSenha: novaSenha, confirmacaoNovaSenha: confirmacao))
-        try await client.send(ServiceTrackAPI.resetSenha(body))
+        try await client.send(ServiceTrackAPI.alterarSenha(body))
     }
 }
 

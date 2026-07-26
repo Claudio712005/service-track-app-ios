@@ -8,23 +8,19 @@ import STDomain
 // MARK: - Autenticação (`components/schemas/autenticacao`)
 
 struct LoginRequestDTO: Encodable {
-    let email: String
+    let cpf: String
     let senha: String
 }
 
 struct LoginResponseDTO: Decodable {
     let token: String
-    let usuarioId: UUID
-    let nome: String
-    let email: String
-    let roles: [String]
+    let tipo: String
+    let expiraEmSegundos: Int
 
-    var domain: Sessao {
-        Sessao(token: token, usuarioId: usuarioId, nome: nome, email: email, roles: roles)
-    }
+    var domain: Sessao? { Sessao(token: token) }
 }
 
-struct ResetarSenhaRequestDTO: Encodable {
+struct AlterarSenhaRequestDTO: Encodable {
     let senhaAtual: String
     let novaSenha: String
     let confirmacaoNovaSenha: String
