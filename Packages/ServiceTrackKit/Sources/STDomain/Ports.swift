@@ -3,9 +3,9 @@ import Foundation
 // Ports do domínio (spec §10.2) — implementados pelos adapters de STData/STPersistence.
 
 public protocol AuthRepository: Sendable {
-    /// `POST /autenticacao/login` — não persiste a sessão; quem decide é o chamador (role gate §8.2).
-    func login(email: String, senha: String) async throws -> Sessao
-    /// `POST /autenticacao/reset-senha` — troca de senha autenticada (spec §9 C6).
+    /// `POST /autenticacao` — não persiste a sessão; quem decide é o chamador (role gate §8.2).
+    func login(cpf: String, senha: String) async throws -> Sessao
+    /// `PUT /usuarios/senha` — troca de senha autenticada (spec §9 C6).
     func alterarSenha(senhaAtual: String, novaSenha: String, confirmacao: String) async throws
 }
 
