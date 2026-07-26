@@ -133,6 +133,7 @@ public final class CadastroStore {
         estado.erroGeral = nil
 
         let email = estado.email.trimmingCharacters(in: .whitespaces)
+        let cpf = estado.cpf.filter(\.isNumber)
         Task {
             do {
                 _ = try await clientes.cadastrar(
@@ -141,9 +142,9 @@ public final class CadastroStore {
                     senha: estado.senha,
                     dataNascimento: estado.dataNascimento,
                     telefone: estado.telefone.filter(\.isNumber),
-                    cpf: estado.cpf.filter(\.isNumber))
+                    cpf: cpf)
                 Telemetria.registrar("signup_completed")
-                let sessao = try await auth.login(email: email, senha: estado.senha)
+                let sessao = try await auth.login(cpf: cpf, senha: estado.senha)
                 try aoAutenticar(sessao)
             } catch let erro as AppError {
                 tratar(erro)

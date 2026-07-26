@@ -20,16 +20,16 @@ public struct LoginView: View {
 
                 VStack(spacing: DSSpacing.lg) {
                     #if os(iOS)
-                    STTextField("E-mail",
-                                texto: Binding(get: { store.estado.email },
-                                               set: { store.send(.emailAlterado($0)) }),
-                                erro: store.estado.erroEmail,
-                                teclado: .emailAddress)
+                    STTextField("CPF",
+                                texto: Binding(get: { store.estado.cpf },
+                                               set: { store.send(.cpfAlterado($0)) }),
+                                erro: store.estado.erroCpf,
+                                teclado: .numberPad)
                     #else
-                    STTextField("E-mail",
-                                texto: Binding(get: { store.estado.email },
-                                               set: { store.send(.emailAlterado($0)) }),
-                                erro: store.estado.erroEmail)
+                    STTextField("CPF",
+                                texto: Binding(get: { store.estado.cpf },
+                                               set: { store.send(.cpfAlterado($0)) }),
+                                erro: store.estado.erroCpf)
                     #endif
 
                     STTextField("Senha",

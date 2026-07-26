@@ -7,10 +7,10 @@ import STObservability
 @Observable
 public final class LoginStore {
     public struct Estado {
-        public var email = ""
+        public var cpf = ""
         public var senha = ""
         public var carregando = false
-        public var erroEmail: String?
+        public var erroCpf: String?
         public var erroSenha: String?
         public var erroGeral: String?
         public var segundosBloqueio = 0
@@ -19,7 +19,7 @@ public final class LoginStore {
     }
 
     public enum Acao {
-        case emailAlterado(String)
+        case cpfAlterado(String)
         case senhaAlterada(String)
         case entrar
     }
@@ -37,9 +37,9 @@ public final class LoginStore {
 
     public func send(_ acao: Acao) {
         switch acao {
-        case .emailAlterado(let email):
-            estado.email = email
-            estado.erroEmail = nil
+        case .cpfAlterado(let cpf):
+            estado.cpf = cpf
+            estado.erroCpf = nil
             estado.erroGeral = nil
         case .senhaAlterada(let senha):
             estado.senha = senha
@@ -57,7 +57,7 @@ public final class LoginStore {
 
         Task {
             do {
-                let sessao = try await auth.login(email: estado.email.trimmingCharacters(in: .whitespaces),
+                let sessao = try await auth.login(cpf: estado.cpf.trimmingCharacters(in: .whitespaces),
                                                   senha: estado.senha)
                 try aoAutenticar(sessao)
                 Telemetria.registrar("login_success")
@@ -71,18 +71,18 @@ public final class LoginStore {
     }
 
     private func validar() -> Bool {
-        estado.erroEmail = Validadores.emailValido(estado.email.trimmingCharacters(in: .whitespaces))
-            ? nil : "Informe um e-mail válido."
+        estado.erroCpf = Validadores.cpfValido(estado.cpf.trimmingCharacters(in: .whitespaces))
+            ? nil : "Informe um CPF válido."
         estado.erroSenha = Validadores.senhaValida(estado.senha)
-            ? nil : "A senha tem pelo menos 6 caracteres."
-        return estado.erroEmail == nil && estado.erroSenha == nil
+            ? nil : "A senha tem pelo menos 8 caracteres."
+        return estado.erroCpf == nil && estado.erroSenha == nil
     }
 
     private func tratar(_ erro: AppError) {
         Telemetria.registrar("login_fail", ["reason": rotuloDeFalha(erro)])
         switch erro {
         case .naoAutenticado:
-            estado.erroGeral = "E-mail ou senha incorretos."
+            estado.erroGeral = "CPF ou senha incorretos."
         case .rateLimited(let retryAfter):
             iniciarBloqueio(segundos: Int((retryAfter ?? 30).rounded()))
         default:
