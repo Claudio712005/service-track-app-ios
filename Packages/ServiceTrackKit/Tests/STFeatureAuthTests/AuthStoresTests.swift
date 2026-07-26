@@ -7,7 +7,7 @@ import STDomain
 private struct AuthFake: AuthRepository {
     var resultado: Result<Sessao, AppError>
 
-    func login(email: String, senha: String) async throws -> Sessao {
+    func login(cpf: String, senha: String) async throws -> Sessao {
         try resultado.get()
     }
 
@@ -32,7 +32,7 @@ private struct ClientesFake: ClienteRepository {
 }
 
 private func sessaoFake(roles: [String] = ["CLIENTE"]) -> Sessao {
-    Sessao(token: "t", usuarioId: UUID(), nome: "Cláudio", email: "c@s.dev", roles: roles)
+    Sessao(token: "t", usuarioId: UUID(), cpf: "52998224725", email: "c@s.dev", roles: roles)
 }
 
 @MainActor
@@ -51,10 +51,10 @@ final class LoginStoreTests: XCTestCase {
         let store = LoginStore(auth: AuthFake(resultado: .success(sessaoFake()))) { _ in
             XCTFail("não deveria autenticar com formulário inválido")
         }
-        store.send(.emailAlterado("invalido"))
+        store.send(.cpfAlterado("111"))
         store.send(.senhaAlterada("123"))
         store.send(.entrar)
-        XCTAssertNotNil(store.estado.erroEmail)
+        XCTAssertNotNil(store.estado.erroCpf)
         XCTAssertNotNil(store.estado.erroSenha)
     }
 
@@ -63,7 +63,7 @@ final class LoginStoreTests: XCTestCase {
         let store = LoginStore(auth: AuthFake(resultado: .success(sessaoFake()))) { _ in
             autenticado = true
         }
-        store.send(.emailAlterado("c@s.dev"))
+        store.send(.cpfAlterado("52998224725"))
         store.send(.senhaAlterada("Senha@123"))
         store.send(.entrar)
         try await aguardar { autenticado }
@@ -77,7 +77,7 @@ final class LoginStoreTests: XCTestCase {
                 throw AppError.regraNegocio("Este app é exclusivo para clientes.")
             }
         }
-        store.send(.emailAlterado("m@s.dev"))
+        store.send(.cpfAlterado("52998224725"))
         store.send(.senhaAlterada("Senha@123"))
         store.send(.entrar)
         try await aguardar { store.estado.erroGeral != nil }
@@ -86,17 +86,17 @@ final class LoginStoreTests: XCTestCase {
 
     func testCredenciaisInvalidas() async throws {
         let store = LoginStore(auth: AuthFake(resultado: .failure(.naoAutenticado))) { _ in }
-        store.send(.emailAlterado("c@s.dev"))
-        store.send(.senhaAlterada("errada1"))
+        store.send(.cpfAlterado("52998224725"))
+        store.send(.senhaAlterada("errada123"))
         store.send(.entrar)
         try await aguardar { store.estado.erroGeral != nil }
-        XCTAssertEqual(store.estado.erroGeral, "E-mail ou senha incorretos.")
+        XCTAssertEqual(store.estado.erroGeral, "CPF ou senha incorretos.")
     }
 
     func testRateLimitBloqueiaCTA() async throws {
         // Spec §12.3: respeitar Retry-After com contador visível.
         let store = LoginStore(auth: AuthFake(resultado: .failure(.rateLimited(retryAfter: 3)))) { _ in }
-        store.send(.emailAlterado("c@s.dev"))
+        store.send(.cpfAlterado("52998224725"))
         store.send(.senhaAlterada("Senha@123"))
         store.send(.entrar)
         try await aguardar { store.estado.segundosBloqueio > 0 }

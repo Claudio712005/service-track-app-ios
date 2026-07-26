@@ -60,7 +60,9 @@ final class DecodingTests: XCTestCase {
     func testLoginResponseComTokenDecodavel() throws {
         let dto = try STJSON.decoder.decode(LoginResponseDTO.self,
                                             from: Data(MockFixtures.loginResponse.utf8))
-        let sessao = dto.domain
+        let sessao = try XCTUnwrap(dto.domain)
+        XCTAssertEqual(sessao.usuarioId.uuidString.lowercased(), MockFixtures.clienteId)
+        XCTAssertEqual(sessao.cpf, "52998224725")
         XCTAssertTrue(sessao.isCliente)
         XCTAssertFalse(sessao.expirada())
         XCTAssertNotNil(sessao.expiraEm)
