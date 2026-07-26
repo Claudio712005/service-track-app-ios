@@ -45,13 +45,13 @@ final class SessaoTests: XCTestCase {
 
     func testSessaoExpirada() {
         let expirado = jwt(payload: #"{"exp": 1000}"#)
-        let sessao = Sessao(token: expirado, usuarioId: UUID(), nome: "n", email: "e", roles: ["CLIENTE"])
+        let sessao = Sessao(token: expirado, usuarioId: UUID(), cpf: "52998224725", email: "e", roles: ["CLIENTE"])
         XCTAssertTrue(sessao.expirada())
         XCTAssertTrue(sessao.isCliente)
     }
 
     func testRoleGate() {
-        let sessao = Sessao(token: "t", usuarioId: UUID(), nome: "n", email: "e", roles: ["MECANICO"])
+        let sessao = Sessao(token: "t", usuarioId: UUID(), cpf: "52998224725", email: "e", roles: ["MECANICO"])
         XCTAssertFalse(sessao.isCliente)
     }
 

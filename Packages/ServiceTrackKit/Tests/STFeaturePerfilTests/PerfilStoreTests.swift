@@ -33,7 +33,7 @@ private final class ClientesFake: ClienteRepository, @unchecked Sendable {
 private struct AuthFake: AuthRepository {
     var erroTroca: AppError?
 
-    func login(email: String, senha: String) async throws -> Sessao { fatalError("não usado") }
+    func login(cpf: String, senha: String) async throws -> Sessao { fatalError("não usado") }
 
     func alterarSenha(senhaAtual: String, novaSenha: String, confirmacao: String) async throws {
         if let erroTroca { throw erroTroca }
@@ -50,7 +50,7 @@ private func aguardar(_ condicao: @escaping () -> Bool) async throws {
 
 @MainActor
 final class PerfilStoreTests: XCTestCase {
-    private let sessao = Sessao(token: "t", usuarioId: UUID(), nome: "Cláudio",
+    private let sessao = Sessao(token: "t", usuarioId: UUID(), cpf: "52998224725",
                                 email: "c@s.dev", roles: ["CLIENTE"])
 
     private func store(clientes: ClientesFake = ClientesFake(),

@@ -37,8 +37,8 @@ public enum Validadores {
         email.range(of: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", options: .regularExpression) != nil
     }
 
-    /// Senha mínima do contrato (`minLength 6`).
+    /// Senha mínima do contrato (`minLength 8`).
     public static func senhaValida(_ senha: String) -> Bool {
-        senha.count >= 6
+        senha.count >= 8
     }
 }

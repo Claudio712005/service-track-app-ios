@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: ServiceTrack API
+  version: 1.0.0
+  description: API para gerenciamento do sistema de atendimento da oficina mecânica
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /clientes:
+    $ref: './openApi/clientes/clientes.yaml'
+  /clientes/{id}:
+    $ref: './openApi/clientes/cliente_id.yaml'
+  /mecanicos:
+    $ref: './openApi/mecanicos/mecanicos.yaml'
+  /mecanicos/{id}:
+    $ref: './openApi/mecanicos/mecanico_id.yaml'
+  /autenticacao:
+    $ref: './openApi/autenticacao/login.yaml'
+  /usuarios/senha:
+    $ref: './openApi/usuario/senha.yaml'
+  /veiculos:
+    $ref: './openApi/veiculo/veiculo.yaml'
+  /veiculos/{id}:
+    $ref: './openApi/veiculo/veiculo_id.yaml'
+  /veiculos/imagens/sugestoes:
+    $ref: './openApi/veiculo/veiculo_imagens_sugestoes.yaml'
+  /servicos:
+    $ref: './openApi/servicos/servicos.yaml'
+  /servicos/{id}:
+    $ref: './openApi/servicos/servico_id.yaml'
+  /servicos/{id}/tempo-medio-conclusao:
+    $ref: './openApi/servicos/servico_tempo_medio.yaml'
+  /insumos:
+    $ref: './openApi/insumos/insumos.yaml'
+  /insumos/{id}:
+    $ref: './openApi/insumos/insumo_id.yaml'
+  /catalogo/servicos:
+    $ref: './openApi/catalogo/catalogo_servicos.yaml'
+  /catalogo/insumos:
+    $ref: './openApi/catalogo/catalogo_insumos.yaml'
+  /ordem-servico:
+    $ref: './openApi/ordemServico/ordemServico.yaml'
+  /ordem-servico/completa:
+    $ref: './openApi/ordemServico/ordemServico_completa.yaml'
+  /ordem-servico/lista:
+    $ref: './openApi/ordemServico/ordemServico_lista.yaml'
+  /ordem-servico/{id}:
+    $ref: './openApi/ordemServico/ordemServico_id.yaml'
+  /ordem-servico/{id}/diagnostico:
+    $ref: './openApi/ordemServico/ordemServico_diagnostico.yaml'
+  /ordem-servico/{id}/diagnostico/itens:
+    $ref: './openApi/ordemServico/ordemServico_diagnostico_itens.yaml'
+  /ordem-servico/{id}/orcamento:
+    $ref: './openApi/ordemServico/ordemServico_orcamento.yaml'
+  /ordem-servico/orcamento/aprovacao:
+    $ref: './openApi/ordemServico/ordemServico_orcamento_aprovacao_email.yaml'
+  /ordem-servico/orcamento/reprovacao:
+    $ref: './openApi/ordemServico/ordemServico_orcamento_reprovacao_email.yaml'
+  /ordem-servico/{id}/orcamento/aprovacao:
+    $ref: './openApi/ordemServico/ordemServico_orcamento_aprovacao.yaml'
+  /ordem-servico/{id}/orcamento/reprovacao:
+    $ref: './openApi/ordemServico/ordemServico_orcamento_reprovacao.yaml'
+  /ordem-servico/{id}/cancelamento:
+    $ref: './openApi/ordemServico/ordemServico_cancelamento.yaml'
+  /ordem-servico/{id}/finalizacao:
+    $ref: './openApi/ordemServico/ordemServico_finalizacao.yaml'
+  /ordem-servico/{id}/entrega:
+    $ref: './openApi/ordemServico/ordemServico_entrega.yaml'
+  /ordem-servico/{id}/itens/{itemId}/concluir:
+    $ref: './openApi/ordemServico/ordemServico_item_concluir.yaml'
+  /dashboard/clientes/{id}:
+    $ref: './openApi/dashboard/dashboard_id_cliente.yaml'
+  /notificacoes:
+    $ref: './openApi/notificacoes/notificacoes.yaml'
+  /notificacoes/{id}:
+    $ref: './openApi/notificacoes/notificacao_id.yaml'
+  /notificacoes/{id}/visualizar:
+    $ref: './openApi/notificacoes/notificacao_visualizar.yaml'
+  /notificacoes/nao-lidas/contagem:
+    $ref: './openApi/notificacoes/notificacao_nao_lidas_contagem.yaml'

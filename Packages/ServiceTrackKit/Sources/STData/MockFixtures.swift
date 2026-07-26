@@ -14,7 +14,7 @@ enum MockFixtures {
         let header = base64url(#"{"alg":"RS256","typ":"JWT"}"#)
         let exp = Int(Date.now.timeIntervalSince1970) + 8 * 3600
         let payload = base64url(
-            #"{"iss":"service-track-api","sub":"\#(clienteId)","upn":"cliente@servicetrack.dev","groups":["CLIENTE"],"exp":\#(exp)}"#)
+            #"{"iss":"service-track-api","sub":"\#(clienteId)","upn":"cliente@servicetrack.dev","cpf":"52998224725","groups":["CLIENTE"],"exp":\#(exp)}"#)
         return "\(header).\(payload).mock-assinatura"
     }
 
@@ -29,10 +29,8 @@ enum MockFixtures {
         """
         {
           "token": "\(token)",
-          "usuarioId": "\(clienteId)",
-          "nome": "Cláudio da Silva Araújo",
-          "email": "cliente@servicetrack.dev",
-          "roles": ["CLIENTE"]
+          "tipo": "Bearer",
+          "expiraEmSegundos": 3600
         }
         """
     }

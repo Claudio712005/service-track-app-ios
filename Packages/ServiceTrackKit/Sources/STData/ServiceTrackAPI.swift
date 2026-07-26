@@ -5,13 +5,13 @@ import STDomain
 /// Fonte única de método+caminho, derivada dos contratos `openApi/**`
 /// (ADR-iOS-002: divergência futura se corrige aqui).
 enum ServiceTrackAPI {
-    // Autenticação — spec §7.3 usa `/autenticacao/login`; índice OpenAPI mapeia `/autenticacao` (D4).
+    // Autenticação por CPF na Lambda de borda (GLOBAL-ADR-004).
     static func login(_ body: Data) -> Endpoint {
-        Endpoint(method: .post, path: "/autenticacao/login", body: body)
+        Endpoint(method: .post, path: "/autenticacao", body: body)
     }
 
-    static func resetSenha(_ body: Data) -> Endpoint {
-        Endpoint(method: .post, path: "/autenticacao/reset-senha", body: body)
+    static func alterarSenha(_ body: Data) -> Endpoint {
+        Endpoint(method: .put, path: "/usuarios/senha", body: body)
     }
 
     // Clientes
